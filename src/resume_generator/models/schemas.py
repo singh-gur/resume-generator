@@ -95,6 +95,26 @@ class ResumeSection(BaseModel):
     priority: int = Field(default=1)
 
 
+class JobListing(BaseModel):
+    title: str
+    company: str
+    location: Optional[str] = None
+    description: Optional[str] = None
+    job_url: Optional[str] = None
+    date_posted: Optional[str] = None
+    job_type: Optional[str] = None
+    salary: Optional[str] = None
+    is_remote: bool = False
+
+
+class JobMatches(BaseModel):
+    search_location: str
+    search_keywords: List[str] = Field(default_factory=list)
+    is_remote_search: bool = False
+    jobs: List[JobListing] = Field(default_factory=list)
+    total_results: int = 0
+
+
 class GeneratedResume(BaseModel):
     user_profile: UserProfile
     job_description: JobDescription
