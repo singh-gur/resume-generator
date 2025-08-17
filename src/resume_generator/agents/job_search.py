@@ -8,7 +8,7 @@ from resume_generator.workflows.state import WorkflowState
 
 
 class JobSearchAgent(BaseAgent):
-    def search_jobs(self, state: WorkflowState) -> dict[str, Any]:
+    def search_jobs(self, state: WorkflowState) -> WorkflowState:
         try:
             user_profile: UserProfile | None = state["user_profile"]
             if not user_profile:
@@ -65,17 +65,13 @@ class JobSearchAgent(BaseAgent):
                 total_results=len(job_listings),
             )
 
-            return {
-                **state,
-                "job_matches": job_matches,
-                "step_completed": state.get("step_completed", []) + ["job_search"],
-            }
+            state["job_matches"] = job_matches
+            state["step_completed"] = state.get("step_completed", []) + ["job_search"]
+            return state
 
         except Exception as e:
-            return {
-                **state,
-                "errors": state.get("errors", []) + [f"Job search failed: {str(e)}"],
-            }
+            state["errors"] = state.get("errors", []) + [f"Job search failed: {str(e)}"]
+            return state
 
     def _generate_search_keywords(self, user_profile: UserProfile) -> list[str]:
         keywords = []
