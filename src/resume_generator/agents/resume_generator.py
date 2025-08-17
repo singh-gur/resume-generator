@@ -1,3 +1,5 @@
+from typing import Any
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     GeneratedResume,
@@ -336,3 +338,6 @@ class ResumeGeneratorAgent(BaseAgent):
             notes.append("Include keywords from job responsibilities in your descriptions")
 
         return notes
+
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
+        return self.generate_resume(state)  # type: ignore

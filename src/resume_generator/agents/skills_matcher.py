@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import JobDescription, SkillMatch, UserProfile
@@ -12,9 +13,7 @@ class SkillsMatcherAgent(BaseAgent):
             job_description = state.get("job_description")
 
             if not user_profile or not job_description:
-                state["errors"] = state.get("errors", []) + [
-                    "Missing user profile or job description for skills matching"
-                ]
+                state["errors"] = state.get("errors", []) + ["Missing user profile or job description for skills matching"]
                 return state
 
             skill_matches = self._analyze_skill_matches(user_profile, job_description)
@@ -27,9 +26,7 @@ class SkillsMatcherAgent(BaseAgent):
 
         return state
 
-    def _analyze_skill_matches(
-        self, user_profile: UserProfile, job_description: JobDescription
-    ) -> list[SkillMatch]:
+    def _analyze_skill_matches(self, user_profile: UserProfile, job_description: JobDescription) -> list[SkillMatch]:
         system_message = """
         You are an expert at matching candidate skills with job requirements.
         Your task is to analyze the user's profile against the job requirements and determine skill matches.
@@ -78,9 +75,7 @@ class SkillsMatcherAgent(BaseAgent):
                 }
                 for edu in user_profile.education
             ],
-            "certifications": [
-                {"name": cert.name, "issuer": cert.issuer} for cert in user_profile.certifications
-            ],
+            "certifications": [{"name": cert.name, "issuer": cert.issuer} for cert in user_profile.certifications],
         }
 
         job_requirements = [
@@ -121,3 +116,6 @@ class SkillsMatcherAgent(BaseAgent):
             skill_matches.append(skill_match)
 
         return skill_matches
+
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
+        return self.match_skills(state)  # type: ignore

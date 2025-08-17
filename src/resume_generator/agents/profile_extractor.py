@@ -146,3 +146,6 @@ class ProfileExtractorAgent(BaseAgent):
                 return datetime.strptime(f"{date_str}-01-01", "%Y-%m-%d").date()
             except Exception:
                 return None
+
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
+        return self.extract_profile(state)  # type: ignore

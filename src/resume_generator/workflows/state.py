@@ -19,7 +19,6 @@ class WorkflowState(TypedDict):
     generated_resume: GeneratedResume | None
     errors: list[str]
     step_completed: list[str]
-    # Job search parameters
     job_search_location: str | None
     job_sites: list[str] | None
     max_results: int | None

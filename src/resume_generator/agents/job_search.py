@@ -17,9 +17,7 @@ class JobSearchAgent(BaseAgent):
                 }
 
             # Extract search parameters from state or use defaults from user profile
-            location = (
-                state.get("job_search_location") or user_profile.contact_info.location or "Remote"
-            )
+            location = state.get("job_search_location") or user_profile.contact_info.location or "Remote"
             job_sites = state.get("job_sites") or ["indeed", "linkedin", "glassdoor"]
             max_results = state.get("max_results") or 20
             hours_old = state.get("hours_old") or 72
@@ -104,9 +102,7 @@ class JobSearchAgent(BaseAgent):
 
         remote_indicators = ["remote", "work from home", "wfh", "anywhere", "virtual"]
 
-        return any(
-            indicator in location or indicator in description for indicator in remote_indicators
-        )
+        return any(indicator in location or indicator in description for indicator in remote_indicators)
 
     def process(self, state: dict[str, Any]) -> dict[str, Any]:
         return self.search_jobs(state)

@@ -82,3 +82,6 @@ class JobAnalyzerAgent(BaseAgent):
             company_culture=data.get("company_culture"),
             benefits=data.get("benefits", []),
         )
+
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
+        return self.analyze_job(state)  # type: ignore
