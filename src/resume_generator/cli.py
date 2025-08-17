@@ -159,7 +159,7 @@ def generate(
 @click.option(
     "--output",
     "-o",
-    default="example_profile.txt",
+    default=".ignore/example_profile.txt",
     help="Output file path for example profile",
 )
 def create_profile_template(output: str):

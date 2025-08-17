@@ -5,13 +5,25 @@ from typing import Any, Dict, Optional
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseLLM
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 
 class BaseAgent(ABC):
     def __init__(self, llm: Optional[BaseLLM] = None):
-        self.llm = llm or ChatOpenAI(
+        if llm:
+            self.llm = llm
+            return
+        api_key = getenv("OPENAI_API_KEY")
+
+        if api_key is None:
+            raise ValueError(
+                "OPENAI_API_KEY environment variable is not set. "
+                "Please set it to use the OpenAI API."
+            )
+
+        self.llm = ChatOpenAI(
             model=getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            api_key=getenv("OPENAI_API_KEY"),
+            api_key=SecretStr(api_key),
             base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
         )
 
