@@ -1,0 +1,8 @@
+{
+    // hide .venv folder from file explorer
+    "files.exclude": {
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.ruff_cache": true
+    }
+}

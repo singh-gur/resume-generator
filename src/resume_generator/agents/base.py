@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from os import getenv
 from typing import Any, Dict, Optional
 
-from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseLLM
+from langchain_openai import ChatOpenAI
 
 
 class BaseAgent(ABC):
