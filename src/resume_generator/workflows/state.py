@@ -11,6 +11,7 @@ from resume_generator.models.schemas import (
 
 class WorkflowState(TypedDict):
     user_profile_raw: str | None
+    user_profile_json: str | None
     job_description_raw: str | None
     user_profile: UserProfile | None
     job_description: JobDescription | None

@@ -77,7 +77,20 @@ def generate(
 
     try:
         # Read profile file
-        profile_text = Path(profile).read_text(encoding="utf-8")
+        profile_path = Path(profile)
+        profile_content = profile_path.read_text(encoding="utf-8")
+
+        # Determine if it's JSON or text format
+        is_json_profile = False
+
+        try:
+            # Try to parse as JSON first
+            json.loads(profile_content)
+            is_json_profile = True
+            click.echo("📋 Detected JSON profile format")
+        except json.JSONDecodeError:
+            # It's a text profile
+            click.echo("📋 Detected text profile format")
 
         click.echo("🚀 Starting resume generation workflow...")
         click.echo(f"🔍 Searching for jobs in: {location}")
@@ -88,7 +101,8 @@ def generate(
 
         # Prepare initial state with job search parameters
         initial_state: WorkflowState = {
-            "user_profile_raw": profile_text,
+            "user_profile_raw": profile_content if not is_json_profile else None,
+            "user_profile_json": profile_content if is_json_profile else None,
             "job_description_raw": None,  # Will be populated by job search
             "user_profile": None,
             "job_description": None,
@@ -159,13 +173,138 @@ def generate(
 @click.option(
     "--output",
     "-o",
-    default=".ignore/example_profile.txt",
+    default="profile_template.json",
     help="Output file path for example profile",
 )
-def create_profile_template(output: str):
+@click.option(
+    "--format",
+    "template_format",
+    type=click.Choice(["json", "text"]),
+    default="json",
+    help="Template format (default: json)",
+)
+def create_profile_template(output: str, template_format: str):
     """Create an example user profile template."""
 
-    template = """John Doe
+    if template_format == "json":
+        template = {
+            "full_name": "John Doe",
+            "contact_info": {
+                "email": "john.doe@email.com",
+                "phone": "(555) 123-4567",
+                "linkedin": "https://linkedin.com/in/johndoe",
+                "github": "https://github.com/johndoe",
+                "portfolio": "https://johndoe.dev",
+                "location": "San Francisco, CA",
+            },
+            "professional_summary": (
+                "Experienced software engineer with 5+ years of experience in full-stack development. "
+                "Proficient in Python, JavaScript, and cloud technologies. Strong background in building "
+                "scalable web applications and working in agile environments."
+            ),
+            "skills": [
+                "Python",
+                "JavaScript",
+                "TypeScript",
+                "Java",
+                "React",
+                "Node.js",
+                "Django",
+                "Flask",
+                "PostgreSQL",
+                "MongoDB",
+                "Redis",
+                "AWS",
+                "Docker",
+                "Kubernetes",
+                "Git",
+                "Jenkins",
+                "JIRA",
+            ],
+            "education": [
+                {
+                    "institution": "University of California, Berkeley",
+                    "degree": "Bachelor of Science",
+                    "field_of_study": "Computer Science",
+                    "graduation_date": "2020-05-01",
+                    "gpa": 3.7,
+                    "relevant_coursework": ["Data Structures", "Algorithms", "Database Systems", "Software Engineering"],
+                }
+            ],
+            "experience": [
+                {
+                    "company": "TechCorp Inc.",
+                    "position": "Senior Software Engineer",
+                    "start_date": "2022-01-01",
+                    "end_date": None,
+                    "description": (
+                        "Lead development of microservices architecture serving 1M+ users daily. "
+                        "Implement CI/CD pipelines and mentor junior developers."
+                    ),
+                    "key_achievements": [
+                        "Led development of microservices architecture serving 1M+ users daily",
+                        "Implemented CI/CD pipelines reducing deployment time by 50%",
+                        "Mentored junior developers and conducted code reviews",
+                    ],
+                    "technologies_used": ["Python", "Django", "AWS", "Docker", "PostgreSQL"],
+                },
+                {
+                    "company": "StartupXYZ",
+                    "position": "Software Engineer",
+                    "start_date": "2020-06-01",
+                    "end_date": "2021-12-01",
+                    "description": "Developed React-based frontend applications and built RESTful APIs using Node.js.",
+                    "key_achievements": [
+                        "Developed React-based frontend applications",
+                        "Built RESTful APIs using Node.js and Express",
+                        "Collaborated with design team to implement responsive UI components",
+                    ],
+                    "technologies_used": ["React", "Node.js", "MongoDB", "JavaScript"],
+                },
+            ],
+            "projects": [
+                {
+                    "name": "E-commerce Platform",
+                    "description": "Built full-stack e-commerce application with React and Django",
+                    "technologies_used": ["React", "Django", "PostgreSQL", "AWS", "Docker"],
+                    "url": "https://github.com/johndoe/ecommerce-platform",
+                    "achievements": [
+                        "Implemented payment processing with Stripe integration",
+                        "Deployed on AWS with auto-scaling capabilities",
+                    ],
+                },
+                {
+                    "name": "Task Management App",
+                    "description": "Developed real-time task management application",
+                    "technologies_used": ["React", "Node.js", "Socket.io", "MongoDB"],
+                    "url": "https://github.com/johndoe/task-manager",
+                    "achievements": ["Implemented WebSocket connections for live updates", "Used Redux for state management"],
+                },
+            ],
+            "certifications": [
+                {
+                    "name": "AWS Certified Solutions Architect - Associate",
+                    "issuer": "Amazon Web Services",
+                    "issue_date": "2023-01-01",
+                    "expiry_date": "2026-01-01",
+                    "credential_url": "https://aws.amazon.com/certification/verify",
+                },
+                {
+                    "name": "Certified Kubernetes Administrator (CKA)",
+                    "issuer": "Cloud Native Computing Foundation",
+                    "issue_date": "2022-01-01",
+                    "expiry_date": "2025-01-01",
+                    "credential_url": None,
+                },
+            ],
+            "languages": ["English (Native)", "Spanish (Conversational)"],
+        }
+
+        with open(output, "w", encoding="utf-8") as f:
+            json.dump(template, f, indent=2, default=str)
+
+    else:  # text format
+        template = """John Doe
 Software Engineer
 
 Contact Information:
@@ -176,8 +315,8 @@ GitHub: https://github.com/johndoe
 Location: San Francisco, CA
 
 Professional Summary:
-Experienced software engineer with 5+ years of experience in full-stack development. 
-Proficient in Python, JavaScript, and cloud technologies. Strong background in building 
+Experienced software engineer with 5+ years of experience in full-stack development.
+Proficient in Python, JavaScript, and cloud technologies. Strong background in building
 scalable web applications and working in agile environments.
 
 Technical Skills:
@@ -230,8 +369,8 @@ Certified Kubernetes Administrator (CKA) | Cloud Native Computing Foundation | 2
 Languages:
 English (Native), Spanish (Conversational)
 """
+        Path(output).write_text(template, encoding="utf-8")
 
-    Path(output).write_text(template, encoding="utf-8")
     click.echo(f"✅ Profile template created: {output}")
     click.echo("Edit this file with your information and use it with the --profile option.")
 
