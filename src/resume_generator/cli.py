@@ -1,8 +1,8 @@
-import click
 import json
-import os
 from pathlib import Path
-from typing import Optional
+
+import click
+
 from resume_generator.workflows.graph import create_resume_workflow
 from resume_generator.workflows.state import WorkflowState
 
@@ -46,23 +46,8 @@ def cli():
     default="json",
     help="Output format",
 )
-@click.option(
-    "--api-key",
-    envvar="OPENAI_API_KEY",
-    help="OpenAI API key (can also be set via OPENAI_API_KEY env var)",
-)
-def generate(
-    profile: str, job: str, output: str, output_format: str, api_key: Optional[str]
-):
+def generate(profile: str, job: str, output: str, output_format: str):
     """Generate a personalized resume based on user profile and job description."""
-
-    if not api_key:
-        click.echo(
-            "Error: OpenAI API key is required. Set OPENAI_API_KEY environment variable or use --api-key option."
-        )
-        raise click.Abort()
-
-    os.environ["OPENAI_API_KEY"] = api_key
 
     try:
         # Read input files

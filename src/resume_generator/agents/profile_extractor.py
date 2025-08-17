@@ -1,14 +1,15 @@
 import json
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
-    UserProfile,
+    Certification,
     ContactInfo,
     Education,
     Experience,
     Project,
-    Certification,
+    UserProfile,
 )
 from resume_generator.workflows.state import WorkflowState
 
@@ -149,5 +150,5 @@ class ProfileExtractorAgent(BaseAgent):
         except (ValueError, TypeError):
             try:
                 return datetime.strptime(f"{date_str}-01-01", "%Y-%m-%d").date()
-            except:
+            except Exception:
                 return None
