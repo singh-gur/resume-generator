@@ -12,8 +12,8 @@ from resume_generator.workflows.state import WorkflowState
 def cli():
     """AI-powered resume generator using LangChain and LangGraph.
 
-    Generate personalized resumes by analyzing user profiles and job descriptions
-    through multiple specialized agents.
+    Generate personalized resumes by analyzing user profiles and searching for
+    available job opportunities through multiple specialized agents.
     """
     pass
 
@@ -27,11 +27,29 @@ def cli():
     help="Path to user profile file (text or JSON)",
 )
 @click.option(
-    "--job",
-    "-j",
-    required=True,
-    type=click.Path(exists=True),
-    help="Path to job description file (text)",
+    "--location",
+    "-l",
+    default="Remote",
+    help="Job search location (default: Remote)",
+)
+@click.option(
+    "--job-sites",
+    multiple=True,
+    default=["indeed", "linkedin", "glassdoor"],
+    type=click.Choice(["indeed", "linkedin", "glassdoor"]),
+    help="Job sites to search (can specify multiple)",
+)
+@click.option(
+    "--max-results",
+    default=20,
+    type=int,
+    help="Maximum number of jobs to search (default: 20)",
+)
+@click.option(
+    "--hours-old",
+    default=72,
+    type=int,
+    help="Only include jobs posted within this many hours (default: 72)",
 )
 @click.option(
     "--output",
@@ -46,29 +64,44 @@ def cli():
     default="json",
     help="Output format",
 )
-def generate(profile: str, job: str, output: str, output_format: str):
-    """Generate a personalized resume based on user profile and job description."""
+def generate(
+    profile: str,
+    location: str,
+    job_sites: tuple,
+    max_results: int,
+    hours_old: int,
+    output: str,
+    output_format: str,
+):
+    """Generate personalized resumes based on user profile and available job opportunities."""
 
     try:
-        # Read input files
+        # Read profile file
         profile_text = Path(profile).read_text(encoding="utf-8")
-        job_text = Path(job).read_text(encoding="utf-8")
 
         click.echo("🚀 Starting resume generation workflow...")
+        click.echo(f"🔍 Searching for jobs in: {location}")
+        click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
 
         # Initialize workflow
         workflow = create_resume_workflow()
 
-        # Prepare initial state
+        # Prepare initial state with job search parameters
         initial_state: WorkflowState = {
             "user_profile_raw": profile_text,
-            "job_description_raw": job_text,
+            "job_description_raw": None,  # Will be populated by job search
             "user_profile": None,
             "job_description": None,
+            "job_matches": None,
             "skill_matches": None,
             "generated_resume": None,
             "errors": [],
             "step_completed": [],
+            # Add job search parameters to state for JobSearchAgent
+            "job_search_location": location,
+            "job_sites": list(job_sites),
+            "max_results": max_results,
+            "hours_old": hours_old,
         }
 
         # Run workflow
@@ -112,10 +145,10 @@ def generate(profile: str, job: str, output: str, output_format: str):
                 click.echo(f"  • {note}")
 
     except FileNotFoundError as e:
-        click.echo(f"❌ File not found: {e}")
+        click.echo(f"❌ Profile file not found: {e}")
         raise click.Abort()
     except json.JSONDecodeError as e:
-        click.echo(f"❌ Invalid JSON in input file: {e}")
+        click.echo(f"❌ Invalid JSON in profile file: {e}")
         raise click.Abort()
     except Exception as e:
         click.echo(f"❌ Unexpected error: {e}")
@@ -202,74 +235,6 @@ English (Native), Spanish (Conversational)
     click.echo(f"✅ Profile template created: {output}")
     click.echo(
         "Edit this file with your information and use it with the --profile option."
-    )
-
-
-@cli.command()
-@click.option(
-    "--output",
-    "-o",
-    default="example_job.txt",
-    help="Output file path for example job description",
-)
-def create_job_template(output: str):
-    """Create an example job description template."""
-
-    template = """Senior Full-Stack Developer
-TechInnovate Solutions
-
-Location: Remote / San Francisco, CA
-Job Type: Full-time
-Salary: $120,000 - $160,000
-
-About the Role:
-We are seeking a highly skilled Senior Full-Stack Developer to join our growing engineering team. 
-You will be responsible for developing and maintaining our core web applications, working closely 
-with product managers and designers to deliver exceptional user experiences.
-
-Key Responsibilities:
-- Design and develop scalable web applications using modern frameworks
-- Build and maintain RESTful APIs and microservices
-- Collaborate with cross-functional teams in an agile environment
-- Mentor junior developers and participate in code reviews
-- Optimize application performance and ensure high availability
-- Write comprehensive tests and maintain code quality standards
-
-Required Qualifications:
-- 5+ years of experience in full-stack web development
-- Strong proficiency in JavaScript/TypeScript and at least one backend language (Python, Java, Node.js)
-- Experience with modern frontend frameworks (React, Vue.js, or Angular)
-- Solid understanding of database design and optimization (SQL and NoSQL)
-- Experience with cloud platforms (AWS, GCP, or Azure)
-- Knowledge of containerization technologies (Docker, Kubernetes)
-- Familiarity with CI/CD pipelines and DevOps practices
-- Strong problem-solving skills and attention to detail
-
-Preferred Qualifications:
-- Experience with microservices architecture
-- Knowledge of message queues and event-driven systems
-- Familiarity with monitoring and logging tools
-- Experience with machine learning or data science libraries
-- Contributions to open-source projects
-- Experience in fintech or healthcare domains
-
-Company Culture:
-We foster a collaborative and inclusive environment where innovation thrives. Our team values 
-continuous learning, work-life balance, and making a positive impact through technology.
-
-Benefits:
-- Competitive salary and equity package
-- Comprehensive health, dental, and vision insurance
-- Flexible PTO and remote work options
-- Professional development budget
-- Modern equipment and home office stipend
-- Team building events and company retreats
-"""
-
-    Path(output).write_text(template, encoding="utf-8")
-    click.echo(f"✅ Job description template created: {output}")
-    click.echo(
-        "Edit this file with the actual job description and use it with the --job option."
     )
 
 

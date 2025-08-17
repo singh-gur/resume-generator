@@ -18,3 +18,8 @@ class WorkflowState(TypedDict):
     generated_resume: Optional[GeneratedResume]
     errors: List[str]
     step_completed: List[str]
+    # Job search parameters
+    job_search_location: Optional[str]
+    job_sites: Optional[List[str]]
+    max_results: Optional[int]
+    hours_old: Optional[int]

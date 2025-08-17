@@ -16,8 +16,15 @@ class JobSearchAgent(BaseAgent):
                     + ["User profile not found for job search"],
                 }
 
-            # Extract search parameters from user profile
-            location = user_profile.contact_info.location or "Remote"
+            # Extract search parameters from state or use defaults from user profile
+            location = (
+                state.get("job_search_location")
+                or user_profile.contact_info.location
+                or "Remote"
+            )
+            job_sites = state.get("job_sites") or ["indeed", "linkedin", "glassdoor"]
+            max_results = state.get("max_results") or 20
+            hours_old = state.get("hours_old") or 72
 
             # Generate search keywords from skills and experience
             search_keywords = self._generate_search_keywords(user_profile)
@@ -27,11 +34,11 @@ class JobSearchAgent(BaseAgent):
 
             # Search for jobs using jobspy
             jobs_df = scrape_jobs(
-                site_name=["indeed", "linkedin", "glassdoor"],
+                site_name=job_sites,
                 search_term=" ".join(search_keywords[:3]),  # Limit to top 3 keywords
                 location=location if not is_remote_search else "Remote",
-                results_wanted=20,
-                hours_old=72,  # Jobs posted in last 3 days
+                results_wanted=max_results,
+                hours_old=hours_old,
                 country_indeed="USA",
             )
 
