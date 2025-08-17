@@ -1,5 +1,3 @@
-from typing import List
-
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     GeneratedResume,
@@ -19,24 +17,20 @@ class ResumeGeneratorAgent(BaseAgent):
             skill_matches = state.get("skill_matches")
 
             if not all([user_profile, job_description, skill_matches]):
-                state["errors"] = state.get("errors", []) + [
-                    "Missing required data for resume generation"
-                ]
+                state["errors"] = state.get("errors", []) + ["Missing required data for resume generation"]
                 return state
 
             generated_resume = self._create_tailored_resume(
-                user_profile, job_description, skill_matches
+                user_profile,  # type: ignore
+                job_description,  # type: ignore
+                skill_matches,  # type: ignore
             )
 
             state["generated_resume"] = generated_resume
-            state["step_completed"] = state.get("step_completed", []) + [
-                "resume_generation"
-            ]
+            state["step_completed"] = state.get("step_completed", []) + ["resume_generation"]
 
         except Exception as e:
-            state["errors"] = state.get("errors", []) + [
-                f"Resume generation error: {str(e)}"
-            ]
+            state["errors"] = state.get("errors", []) + [f"Resume generation error: {str(e)}"]
 
         return state
 
@@ -44,17 +38,13 @@ class ResumeGeneratorAgent(BaseAgent):
         self,
         user_profile: UserProfile,
         job_description: JobDescription,
-        skill_matches: List[SkillMatch],
+        skill_matches: list[SkillMatch],
     ) -> GeneratedResume:
         # Generate customized professional summary
-        customized_summary = self._generate_custom_summary(
-            user_profile, job_description, skill_matches
-        )
+        customized_summary = self._generate_custom_summary(user_profile, job_description, skill_matches)
 
         # Generate resume sections
-        sections = self._generate_resume_sections(
-            user_profile, job_description, skill_matches
-        )
+        sections = self._generate_resume_sections(user_profile, job_description, skill_matches)
 
         # Calculate match percentage
         match_percentage = self._calculate_match_percentage(skill_matches)
@@ -76,7 +66,7 @@ class ResumeGeneratorAgent(BaseAgent):
         self,
         user_profile: UserProfile,
         job_description: JobDescription,
-        skill_matches: List[SkillMatch],
+        skill_matches: list[SkillMatch],
     ) -> str:
         system_message = """
         You are an expert resume writer. Create a compelling, tailored professional summary that:
@@ -90,11 +80,7 @@ class ResumeGeneratorAgent(BaseAgent):
         """
 
         # Get top matching skills
-        top_skills = [
-            match.skill
-            for match in skill_matches
-            if match.user_has_skill and match.match_score > 0.7
-        ][:5]
+        top_skills = [match.skill for match in skill_matches if match.user_has_skill and match.match_score > 0.7][:5]
 
         user_message = f"""
         Job Title: {job_description.title}
@@ -121,8 +107,8 @@ class ResumeGeneratorAgent(BaseAgent):
         self,
         user_profile: UserProfile,
         job_description: JobDescription,
-        skill_matches: List[SkillMatch],
-    ) -> List[ResumeSection]:
+        skill_matches: list[SkillMatch],
+    ) -> list[ResumeSection]:
         sections = []
 
         # Contact Information
@@ -136,9 +122,7 @@ class ResumeGeneratorAgent(BaseAgent):
         sections.append(skills_section)
 
         # Experience Section (prioritized and tailored)
-        experience_section = self._create_experience_section(
-            user_profile, job_description, skill_matches
-        )
+        experience_section = self._create_experience_section(user_profile, job_description, skill_matches)
         sections.append(experience_section)
 
         # Education Section
@@ -147,9 +131,7 @@ class ResumeGeneratorAgent(BaseAgent):
 
         # Projects Section (if relevant)
         if user_profile.projects:
-            projects_section = self._create_projects_section(
-                user_profile, skill_matches
-            )
+            projects_section = self._create_projects_section(user_profile, skill_matches)
             sections.append(projects_section)
 
         # Certifications Section (if any)
@@ -179,25 +161,15 @@ class ResumeGeneratorAgent(BaseAgent):
             priority=1,
         )
 
-    def _create_skills_section(
-        self, user_profile: UserProfile, skill_matches: List[SkillMatch]
-    ) -> ResumeSection:
+    def _create_skills_section(self, user_profile: UserProfile, skill_matches: list[SkillMatch]) -> ResumeSection:
         # Prioritize skills based on job relevance
-        matched_skills = [
-            match.skill
-            for match in skill_matches
-            if match.user_has_skill and match.match_score > 0.5
-        ]
+        matched_skills = [match.skill for match in skill_matches if match.user_has_skill and match.match_score > 0.5]
         user_skills = user_profile.skills
 
         # Combine and prioritize
         prioritized_skills = []
         for skill in matched_skills:
-            if any(
-                skill.lower() in user_skill.lower()
-                or user_skill.lower() in skill.lower()
-                for user_skill in user_skills
-            ):
+            if any(skill.lower() in user_skill.lower() or user_skill.lower() in skill.lower() for user_skill in user_skills):
                 prioritized_skills.append(skill)
 
         # Add remaining user skills
@@ -215,7 +187,7 @@ class ResumeGeneratorAgent(BaseAgent):
         self,
         user_profile: UserProfile,
         job_description: JobDescription,
-        skill_matches: List[SkillMatch],
+        skill_matches: list[SkillMatch],
     ) -> ResumeSection:
         experience_content = []
 
@@ -224,9 +196,7 @@ class ResumeGeneratorAgent(BaseAgent):
             exp_content.append(f"{exp.position} | {exp.company}")
 
             # Add dates
-            start_date = (
-                exp.start_date.strftime("%Y-%m") if exp.start_date else "Unknown"
-            )
+            start_date = exp.start_date.strftime("%Y-%m") if exp.start_date else "Unknown"
             end_date = exp.end_date.strftime("%Y-%m") if exp.end_date else "Present"
             exp_content.append(f"{start_date} - {end_date}")
 
@@ -242,11 +212,7 @@ class ResumeGeneratorAgent(BaseAgent):
                 relevant_techs = [
                     tech
                     for tech in exp.technologies_used
-                    if any(
-                        match.skill.lower() in tech.lower()
-                        for match in skill_matches
-                        if match.user_has_skill
-                    )
+                    if any(match.skill.lower() in tech.lower() for match in skill_matches if match.user_has_skill)
                 ]
                 if relevant_techs:
                     exp_content.append(f"Technologies: {', '.join(relevant_techs)}")
@@ -278,29 +244,17 @@ class ResumeGeneratorAgent(BaseAgent):
             education_content.append(" ".join(edu_content))
 
             if edu.relevant_coursework:
-                education_content.append(
-                    f"Relevant Coursework: {', '.join(edu.relevant_coursework[:5])}"
-                )
+                education_content.append(f"Relevant Coursework: {', '.join(edu.relevant_coursework[:5])}")
 
-        return ResumeSection(
-            section_name="Education", content="\n\n".join(education_content), priority=4
-        )
+        return ResumeSection(section_name="Education", content="\n\n".join(education_content), priority=4)
 
-    def _create_projects_section(
-        self, user_profile: UserProfile, skill_matches: List[SkillMatch]
-    ) -> ResumeSection:
+    def _create_projects_section(self, user_profile: UserProfile, skill_matches: list[SkillMatch]) -> ResumeSection:
         # Select most relevant projects
         relevant_projects = []
-        matched_skills = [
-            match.skill.lower() for match in skill_matches if match.user_has_skill
-        ]
+        matched_skills = [match.skill.lower() for match in skill_matches if match.user_has_skill]
 
         for project in user_profile.projects:
-            relevance_score = sum(
-                1
-                for tech in project.technologies_used
-                if any(skill in tech.lower() for skill in matched_skills)
-            )
+            relevance_score = sum(1 for tech in project.technologies_used if any(skill in tech.lower() for skill in matched_skills))
             relevant_projects.append((project, relevance_score))
 
         # Sort by relevance and take top 3
@@ -316,9 +270,7 @@ class ResumeGeneratorAgent(BaseAgent):
             proj_content.append(f"• {project.description}")
 
             if project.technologies_used:
-                proj_content.append(
-                    f"Technologies: {', '.join(project.technologies_used)}"
-                )
+                proj_content.append(f"Technologies: {', '.join(project.technologies_used)}")
 
             for achievement in project.achievements:
                 proj_content.append(f"• {achievement}")
@@ -331,9 +283,7 @@ class ResumeGeneratorAgent(BaseAgent):
             priority=5,
         )
 
-    def _create_certifications_section(
-        self, user_profile: UserProfile
-    ) -> ResumeSection:
+    def _create_certifications_section(self, user_profile: UserProfile) -> ResumeSection:
         certifications_content = []
 
         for cert in user_profile.certifications:
@@ -348,22 +298,16 @@ class ResumeGeneratorAgent(BaseAgent):
             priority=6,
         )
 
-    def _calculate_match_percentage(self, skill_matches: List[SkillMatch]) -> float:
+    def _calculate_match_percentage(self, skill_matches: list[SkillMatch]) -> float:
         if not skill_matches:
             return 0.0
 
-        total_score = sum(
-            match.match_score for match in skill_matches if match.user_has_skill
-        )
+        total_score = sum(match.match_score for match in skill_matches if match.user_has_skill)
         max_possible_score = len(skill_matches)
 
-        return (
-            (total_score / max_possible_score) * 100 if max_possible_score > 0 else 0.0
-        )
+        return (total_score / max_possible_score) * 100 if max_possible_score > 0 else 0.0
 
-    def _generate_tailoring_notes(
-        self, skill_matches: List[SkillMatch], job_description: JobDescription
-    ) -> List[str]:
+    def _generate_tailoring_notes(self, skill_matches: list[SkillMatch], job_description: JobDescription) -> list[str]:
         notes = []
 
         # Missing critical skills
@@ -379,26 +323,16 @@ class ResumeGeneratorAgent(BaseAgent):
         ]
 
         if missing_skills:
-            notes.append(
-                f"Consider developing skills in: {', '.join(missing_skills[:3])}"
-            )
+            notes.append(f"Consider developing skills in: {', '.join(missing_skills[:3])}")
 
         # Strong matches to highlight
-        strong_matches = [
-            match.skill
-            for match in skill_matches
-            if match.user_has_skill and match.match_score >= 0.8
-        ]
+        strong_matches = [match.skill for match in skill_matches if match.user_has_skill and match.match_score >= 0.8]
 
         if strong_matches:
-            notes.append(
-                f"Emphasize these strong skill matches: {', '.join(strong_matches[:3])}"
-            )
+            notes.append(f"Emphasize these strong skill matches: {', '.join(strong_matches[:3])}")
 
         # Industry keywords to include
         if job_description.responsibilities:
-            notes.append(
-                "Include keywords from job responsibilities in your descriptions"
-            )
+            notes.append("Include keywords from job responsibilities in your descriptions")
 
         return notes

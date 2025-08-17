@@ -1,5 +1,6 @@
 import json
-from typing import Dict, Any
+from typing import Any
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import JobDescription, JobRequirement
 from resume_generator.workflows.state import WorkflowState
@@ -10,9 +11,7 @@ class JobAnalyzerAgent(BaseAgent):
         try:
             job_description_raw = state.get("job_description_raw", "")
             if not job_description_raw:
-                state["errors"] = state.get("errors", []) + [
-                    "No job description data provided"
-                ]
+                state["errors"] = state.get("errors", []) + ["No job description data provided"]
                 return state
 
             system_message = """
@@ -55,13 +54,11 @@ class JobAnalyzerAgent(BaseAgent):
             state["step_completed"] = state.get("step_completed", []) + ["job_analysis"]
 
         except Exception as e:
-            state["errors"] = state.get("errors", []) + [
-                f"Job analysis error: {str(e)}"
-            ]
+            state["errors"] = state.get("errors", []) + [f"Job analysis error: {str(e)}"]
 
         return state
 
-    def _parse_job_data(self, data: Dict[str, Any]) -> JobDescription:
+    def _parse_job_data(self, data: dict[str, Any]) -> JobDescription:
         # Parse requirements
         requirements_list = []
         for req_data in data.get("requirements", []):

@@ -233,9 +233,7 @@ English (Native), Spanish (Conversational)
 
     Path(output).write_text(template, encoding="utf-8")
     click.echo(f"✅ Profile template created: {output}")
-    click.echo(
-        "Edit this file with your information and use it with the --profile option."
-    )
+    click.echo("Edit this file with your information and use it with the --profile option.")
 
 
 def format_resume_as_text(resume) -> str:

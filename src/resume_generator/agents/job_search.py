@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from jobspy import scrape_jobs
 
@@ -7,21 +7,18 @@ from resume_generator.models.schemas import JobListing, JobMatches, UserProfile
 
 
 class JobSearchAgent(BaseAgent):
-    def search_jobs(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def search_jobs(self, state: dict[str, Any]) -> dict[str, Any]:
         try:
             user_profile: UserProfile = state.get("user_profile")
             if not user_profile:
                 return {
                     **state,
-                    "errors": state.get("errors", [])
-                    + ["User profile not found for job search"],
+                    "errors": state.get("errors", []) + ["User profile not found for job search"],
                 }
 
             # Extract search parameters from state or use defaults from user profile
             location = (
-                state.get("job_search_location")
-                or user_profile.contact_info.location
-                or "Remote"
+                state.get("job_search_location") or user_profile.contact_info.location or "Remote"
             )
             job_sites = state.get("job_sites") or ["indeed", "linkedin", "glassdoor"]
             max_results = state.get("max_results") or 20
@@ -51,9 +48,7 @@ class JobSearchAgent(BaseAgent):
                         title=str(row.get("title", "")),
                         company=str(row.get("company", "")),
                         location=str(row.get("location", "")),
-                        description=str(row.get("description", ""))[
-                            :500
-                        ],  # Truncate description
+                        description=str(row.get("description", ""))[:500],  # Truncate description
                         job_url=str(row.get("job_url", "")),
                         date_posted=str(row.get("date_posted", "")),
                         job_type=str(row.get("job_type", "")),
@@ -83,7 +78,7 @@ class JobSearchAgent(BaseAgent):
                 "errors": state.get("errors", []) + [f"Job search failed: {str(e)}"],
             }
 
-    def _generate_search_keywords(self, user_profile: UserProfile) -> List[str]:
+    def _generate_search_keywords(self, user_profile: UserProfile) -> list[str]:
         keywords = []
 
         # Add top skills
@@ -110,9 +105,8 @@ class JobSearchAgent(BaseAgent):
         remote_indicators = ["remote", "work from home", "wfh", "anywhere", "virtual"]
 
         return any(
-            indicator in location or indicator in description
-            for indicator in remote_indicators
+            indicator in location or indicator in description for indicator in remote_indicators
         )
 
-    def process(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
         return self.search_jobs(state)

@@ -1,10 +1,11 @@
-from langgraph.graph import StateGraph, END
-from resume_generator.workflows.state import WorkflowState
-from resume_generator.agents.profile_extractor import ProfileExtractorAgent
+from langgraph.graph import END, StateGraph
+
 from resume_generator.agents.job_analyzer import JobAnalyzerAgent
 from resume_generator.agents.job_search import JobSearchAgent
-from resume_generator.agents.skills_matcher import SkillsMatcherAgent
+from resume_generator.agents.profile_extractor import ProfileExtractorAgent
 from resume_generator.agents.resume_generator import ResumeGeneratorAgent
+from resume_generator.agents.skills_matcher import SkillsMatcherAgent
+from resume_generator.workflows.state import WorkflowState
 
 
 def create_resume_workflow():

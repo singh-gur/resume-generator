@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from os import getenv
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseLLM
@@ -9,7 +9,7 @@ from pydantic import SecretStr
 
 
 class BaseAgent(ABC):
-    def __init__(self, llm: Optional[BaseLLM] = None):
+    def __init__(self, llm: BaseLLM | None = None):
         if llm:
             self.llm = llm
             return
@@ -34,5 +34,5 @@ class BaseAgent(ABC):
         ]
 
     @abstractmethod
-    def process(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, state: dict[str, Any]) -> dict[str, Any]:
         pass

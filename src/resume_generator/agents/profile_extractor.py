@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
@@ -19,9 +19,7 @@ class ProfileExtractorAgent(BaseAgent):
         try:
             user_profile_raw = state.get("user_profile_raw", "")
             if not user_profile_raw:
-                state["errors"] = state.get("errors", []) + [
-                    "No user profile data provided"
-                ]
+                state["errors"] = state.get("errors", []) + ["No user profile data provided"]
                 return state
 
             system_message = """
@@ -56,18 +54,14 @@ class ProfileExtractorAgent(BaseAgent):
             user_profile = self._parse_profile_data(profile_data)
 
             state["user_profile"] = user_profile
-            state["step_completed"] = state.get("step_completed", []) + [
-                "profile_extraction"
-            ]
+            state["step_completed"] = state.get("step_completed", []) + ["profile_extraction"]
 
         except Exception as e:
-            state["errors"] = state.get("errors", []) + [
-                f"Profile extraction error: {str(e)}"
-            ]
+            state["errors"] = state.get("errors", []) + [f"Profile extraction error: {str(e)}"]
 
         return state
 
-    def _parse_profile_data(self, data: Dict[str, Any]) -> UserProfile:
+    def _parse_profile_data(self, data: dict[str, Any]) -> UserProfile:
         # Parse contact info
         contact_data = data.get("contact_info", {})
         contact_info = ContactInfo(

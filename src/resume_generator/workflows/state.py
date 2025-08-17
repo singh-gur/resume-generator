@@ -1,25 +1,26 @@
-from typing import List, Optional, TypedDict
+from typing import TypedDict
+
 from resume_generator.models.schemas import (
-    UserProfile,
-    JobDescription,
-    SkillMatch,
     GeneratedResume,
+    JobDescription,
     JobMatches,
+    SkillMatch,
+    UserProfile,
 )
 
 
 class WorkflowState(TypedDict):
-    user_profile_raw: Optional[str]
-    job_description_raw: Optional[str]
-    user_profile: Optional[UserProfile]
-    job_description: Optional[JobDescription]
-    job_matches: Optional[JobMatches]
-    skill_matches: Optional[List[SkillMatch]]
-    generated_resume: Optional[GeneratedResume]
-    errors: List[str]
-    step_completed: List[str]
+    user_profile_raw: str | None
+    job_description_raw: str | None
+    user_profile: UserProfile | None
+    job_description: JobDescription | None
+    job_matches: JobMatches | None
+    skill_matches: list[SkillMatch] | None
+    generated_resume: GeneratedResume | None
+    errors: list[str]
+    step_completed: list[str]
     # Job search parameters
-    job_search_location: Optional[str]
-    job_sites: Optional[List[str]]
-    max_results: Optional[int]
-    hours_old: Optional[int]
+    job_search_location: str | None
+    job_sites: list[str] | None
+    max_results: int | None
+    hours_old: int | None

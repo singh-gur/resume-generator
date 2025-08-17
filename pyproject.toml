@@ -26,3 +26,73 @@ dev = [
     "ruff>=0.12.9",
 ]
 
+[tool.ruff]
+# Exclude patterns for files/directories that should not be linted
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Set the maximum line length to 88 (default is 88)
+line-length = 135
+
+# Set the target Python version
+target-version = "py313"
+
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = [
+    "E",     # pycodestyle errors
+    "F",     # Pyflakes
+    "I",     # isort
+    "W",     # pycodestyle warnings
+    "C9",    # mccabe
+    "B",     # flake8-bugbear
+    "UP",    # pyupgrade
+    "SIM",   # flake8-simplify
+]
+
+ignore = [
+    "W293"
+]
+# Allow unused variables when their name starts with an underscore
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.mccabe]
+# Set the maximum complexity
+max-complexity = 10
+
+[tool.ruff.format]
+# Enable reformatting of code snippets in docstrings
+docstring-code-format = true
+
+# Use double quotes for strings
+quote-style = "double"
+
+# Use spaces for indentation
+indent-style = "space"
+
+# Set the line ending to LF
+line-ending = "auto"
+
+# Skip trailing comma on function calls/defs
+skip-magic-trailing-comma = false
+
