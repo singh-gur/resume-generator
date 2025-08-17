@@ -1,8 +1,9 @@
 from typing import Any, Dict, List
+
 from jobspy import scrape_jobs
 
 from resume_generator.agents.base import BaseAgent
-from resume_generator.models.schemas import JobMatches, JobListing, UserProfile
+from resume_generator.models.schemas import JobListing, JobMatches, UserProfile
 
 
 class JobSearchAgent(BaseAgent):

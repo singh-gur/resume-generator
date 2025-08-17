@@ -1,7 +1,8 @@
 import json
 from typing import List
+
 from resume_generator.agents.base import BaseAgent
-from resume_generator.models.schemas import SkillMatch, UserProfile, JobDescription
+from resume_generator.models.schemas import JobDescription, SkillMatch, UserProfile
 from resume_generator.workflows.state import WorkflowState
 
 

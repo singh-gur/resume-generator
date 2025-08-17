@@ -1,11 +1,12 @@
 from typing import List
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     GeneratedResume,
-    ResumeSection,
-    UserProfile,
     JobDescription,
+    ResumeSection,
     SkillMatch,
+    UserProfile,
 )
 from resume_generator.workflows.state import WorkflowState
 
