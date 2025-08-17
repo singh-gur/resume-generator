@@ -4,7 +4,7 @@ from typing import Any
 from langchain.schema import BaseMessage
 
 from resume_generator.agents.base import BaseAgent
-from resume_generator.models.schemas import JobDescription, SkillMatch, UserProfile
+from resume_generator.models.schemas import JobListing, SkillMatch, UserProfile
 from resume_generator.workflows.state import WorkflowState
 
 
@@ -12,15 +12,19 @@ class SkillsMatcherAgent(BaseAgent):
     def match_skills(self, state: WorkflowState) -> WorkflowState:
         try:
             user_profile = state.get("user_profile")
-            job_description = state.get("job_description")
+            job_matches = state.get("job_matches")
 
-            if not user_profile or not job_description:
-                state["errors"] = state.get("errors", []) + ["Missing user profile or job description for skills matching"]
+            if not user_profile or not job_matches:
+                state["errors"] = state.get("errors", []) + ["Missing user profile or job matches for skills matching"]
                 return state
 
-            skill_matches = self._analyze_skill_matches(user_profile, job_description)
+            # Generate skill matches for each job listing
+            job_skill_matches = []
+            for job_listing in job_matches.jobs:
+                skill_matches = self._analyze_skill_matches_for_job(user_profile, job_listing)
+                job_skill_matches.append({"job_listing": job_listing, "skill_matches": skill_matches})
 
-            state["skill_matches"] = skill_matches
+            state["job_skill_matches"] = job_skill_matches
             state["step_completed"] = state.get("step_completed", []) + ["skills_matching"]
 
         except Exception as e:
@@ -28,25 +32,28 @@ class SkillsMatcherAgent(BaseAgent):
 
         return state
 
-    def _analyze_skill_matches(self, user_profile: UserProfile, job_description: JobDescription) -> list[SkillMatch]:
+    def _analyze_skill_matches_for_job(self, user_profile: UserProfile, job_listing: JobListing) -> list[SkillMatch]:
         system_message = """
-        You are an expert at matching candidate skills with job requirements.
-        Your task is to analyze the user's profile against the job requirements and determine skill matches.
+        You are an expert at matching candidate skills with job listings.
+        Your task is to analyze the user's profile against a job listing and determine skill matches.
         
-        For each requirement in the job description, determine:
+        Based on the job title, company, and description, infer the key skills and requirements needed.
+        For each inferred skill/requirement, determine:
         1. Whether the user has this skill (based on their profile)
         2. The proficiency level (beginner, intermediate, advanced) if they have it
         3. A match score from 0.0 to 1.0
         4. Evidence from their profile that demonstrates this skill
         
         Consider:
-        - Direct skill mentions
+        - Direct skill mentions in user profile
         - Technology experience from work/projects
         - Education background
         - Certifications
         - Project descriptions that imply skill usage
+        - Job title and description keywords
         
-        Return a JSON array of skill matches, one for each job requirement.
+        Focus on the most important 8-10 skills/requirements for this specific job.
+        Return a JSON array of skill matches.
         """
 
         user_data = {
@@ -80,23 +87,23 @@ class SkillsMatcherAgent(BaseAgent):
             "certifications": [{"name": cert.name, "issuer": cert.issuer} for cert in user_profile.certifications],
         }
 
-        job_requirements = [
-            {
-                "category": req.category,
-                "skill_or_requirement": req.skill_or_requirement,
-                "importance_weight": req.importance_weight,
-            }
-            for req in job_description.requirements
-        ]
+        job_data = {
+            "title": job_listing.title,
+            "company": job_listing.company,
+            "location": job_listing.location,
+            "description": job_listing.description,
+            "job_type": job_listing.job_type,
+            "is_remote": job_listing.is_remote,
+        }
 
         user_message = f"""
         User Profile Data:
         {json.dumps(user_data, indent=2)}
         
-        Job Requirements:
-        {json.dumps(job_requirements, indent=2)}
+        Job Listing:
+        {json.dumps(job_data, indent=2)}
         
-        Analyze and return skill matches.
+        Analyze the job listing and determine the key skills/requirements needed, then match against the user profile.
         """
 
         messages = self.create_prompt(system_message, user_message)

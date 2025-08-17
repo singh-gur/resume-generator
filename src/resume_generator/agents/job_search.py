@@ -67,11 +67,10 @@ class JobSearchAgent(BaseAgent):
 
             state["job_matches"] = job_matches
             state["step_completed"] = state.get("step_completed", []) + ["job_search"]
-            return state
 
         except Exception as e:
             state["errors"] = state.get("errors", []) + [f"Job search failed: {str(e)}"]
-            return state
+        return state
 
     def _generate_search_keywords(self, user_profile: UserProfile) -> list[str]:
         keywords = []

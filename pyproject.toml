@@ -68,7 +68,7 @@ select = [
     "B",     # flake8-bugbear
     "UP",    # pyupgrade
     "SIM",   # flake8-simplify
-]
+] 
 
 ignore = [
     "W293"

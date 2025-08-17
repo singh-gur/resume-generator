@@ -96,8 +96,10 @@ def generate(
             "user_profile": None,
             "job_description": None,
             "job_matches": None,
+            "job_skill_matches": None,
             "skill_matches": None,
             "generated_resume": None,
+            "generated_resumes": None,
             "errors": [],
             "step_completed": [],
             "job_search_location": location,
@@ -115,21 +117,34 @@ def generate(
                 click.echo(f"  • {error}")
             raise click.Abort()
 
-        generated_resume = result.get("generated_resume")
-        if not generated_resume:
-            click.echo("❌ Failed to generate resume")
+        generated_resumes = result.get("generated_resumes")
+        if not generated_resumes:
+            click.echo("❌ Failed to generate resumes")
             raise click.Abort()
 
-        output_path = Path(output)
-        output_path.write_text(render_resume(generated_resume, output_format), encoding="utf-8")
+        click.echo(f"✅ Generated {len(generated_resumes)} tailored resumes!")
 
-        click.echo("✅ Resume generated successfully!")
-        click.echo(f"📄 Output saved to: {output_path}")
-        click.echo(f"🎯 Match percentage: {generated_resume.match_percentage:.1f}%")
+        # Save each resume with a unique filename
+        for i, resume in enumerate(generated_resumes):
+            output_path = Path(output)
+            if len(generated_resumes) > 1:
+                # Add index to filename for multiple resumes
+                stem = output_path.stem
+                suffix = output_path.suffix
+                output_path = output_path.with_name(f"{stem}_{i + 1}{suffix}")
 
-        notes = getattr(generated_resume, "tailoring_notes", None) or []
+            output_path.write_text(render_resume(resume, output_format), encoding="utf-8")
+
+            job_info = f"{resume.job_description.title} at {resume.job_description.company}"
+            click.echo(f"📄 Resume {i + 1}: {job_info}")
+            click.echo(f"   📁 Saved to: {output_path}")
+            click.echo(f"   🎯 Match: {resume.match_percentage:.1f}%")
+
+        # Show tailoring suggestions from the best matching resume
+        best_resume = max(generated_resumes, key=lambda r: r.match_percentage)
+        notes = getattr(best_resume, "tailoring_notes", None) or []
         if notes:
-            click.echo("\n💡 Tailoring suggestions:")
+            click.echo(f"\n💡 Tailoring suggestions (from best match - {best_resume.match_percentage:.1f}%):")
             for note in notes:
                 click.echo(f"  • {note}")
 

@@ -16,8 +16,10 @@ class WorkflowState(TypedDict):
     user_profile: UserProfile | None
     job_description: JobDescription | None
     job_matches: JobMatches | None
-    skill_matches: list[SkillMatch] | None
-    generated_resume: GeneratedResume | None
+    job_skill_matches: list[dict] | None  # List of {job_listing, skill_matches} dicts
+    skill_matches: list[SkillMatch] | None  # Kept for backwards compatibility
+    generated_resume: GeneratedResume | None  # Kept for backwards compatibility
+    generated_resumes: list[GeneratedResume] | None  # New field for multiple resumes
     errors: list[str]
     step_completed: list[str]
     job_search_location: str | None

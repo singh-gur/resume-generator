@@ -1,6 +1,5 @@
 from langgraph.graph import END, StateGraph
 
-from resume_generator.agents.job_analyzer import JobAnalyzerAgent
 from resume_generator.agents.job_search import JobSearchAgent
 from resume_generator.agents.profile_extractor import ProfileExtractorAgent
 from resume_generator.agents.resume_generator import ResumeGeneratorAgent
@@ -13,14 +12,12 @@ def create_resume_workflow():
 
     # Initialize agents
     profile_agent = ProfileExtractorAgent()
-    job_agent = JobAnalyzerAgent()
     job_search_agent = JobSearchAgent()
     skills_agent = SkillsMatcherAgent()
     resume_agent = ResumeGeneratorAgent()
 
     # Add nodes
     workflow.add_node("extract_profile", profile_agent.extract_profile)
-    workflow.add_node("analyze_job", job_agent.analyze_job)
     workflow.add_node("search_jobs", job_search_agent.search_jobs)
     workflow.add_node("match_skills", skills_agent.match_skills)
     workflow.add_node("generate_resume", resume_agent.generate_resume)
@@ -29,8 +26,7 @@ def create_resume_workflow():
     workflow.set_entry_point("extract_profile")
 
     workflow.add_edge("extract_profile", "search_jobs")
-    workflow.add_edge("search_jobs", "analyze_job")
-    workflow.add_edge("analyze_job", "match_skills")
+    workflow.add_edge("search_jobs", "match_skills")
     workflow.add_edge("match_skills", "generate_resume")
     workflow.add_edge("generate_resume", END)
 

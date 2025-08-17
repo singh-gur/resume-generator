@@ -6,6 +6,7 @@ from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     GeneratedResume,
     JobDescription,
+    JobListing,
     ResumeSection,
     SkillMatch,
     UserProfile,
@@ -17,20 +18,26 @@ class ResumeGeneratorAgent(BaseAgent):
     def generate_resume(self, state: WorkflowState) -> WorkflowState:
         try:
             user_profile = state.get("user_profile")
-            job_description = state.get("job_description")
-            skill_matches = state.get("skill_matches")
+            job_skill_matches = state.get("job_skill_matches")
 
-            if not all([user_profile, job_description, skill_matches]):
+            if not user_profile or not job_skill_matches:
                 state["errors"] = state.get("errors", []) + ["Missing required data for resume generation"]
                 return state
 
-            generated_resume = self._create_tailored_resume(
-                user_profile,  # type: ignore
-                job_description,  # type: ignore
-                skill_matches,  # type: ignore
-            )
+            # Generate a resume for each job listing
+            generated_resumes = []
+            for job_match in job_skill_matches:
+                job_listing = job_match["job_listing"]
+                skill_matches = job_match["skill_matches"]
 
-            state["generated_resume"] = generated_resume
+                generated_resume = self._create_tailored_resume(
+                    user_profile,  # type: ignore
+                    job_listing,  # type: ignore
+                    skill_matches,  # type: ignore
+                )
+                generated_resumes.append(generated_resume)
+
+            state["generated_resumes"] = generated_resumes
             state["step_completed"] = state.get("step_completed", []) + ["resume_generation"]
 
         except Exception as e:
@@ -41,24 +48,27 @@ class ResumeGeneratorAgent(BaseAgent):
     def _create_tailored_resume(
         self,
         user_profile: UserProfile,
-        job_description: JobDescription,
+        job_listing: JobListing,
         skill_matches: list[SkillMatch],
     ) -> GeneratedResume:
         # Generate customized professional summary
-        customized_summary = self._generate_custom_summary(user_profile, job_description, skill_matches)
+        customized_summary = self._generate_custom_summary(user_profile, job_listing, skill_matches)
 
         # Generate resume sections
-        sections = self._generate_resume_sections(user_profile, job_description, skill_matches)
+        sections = self._generate_resume_sections(user_profile, job_listing, skill_matches)
 
         # Calculate match percentage
         match_percentage = self._calculate_match_percentage(skill_matches)
 
         # Generate tailoring notes
-        tailoring_notes = self._generate_tailoring_notes(skill_matches, job_description)
+        tailoring_notes = self._generate_tailoring_notes(skill_matches, job_listing)
+
+        # Create a JobDescription equivalent from JobListing for compatibility
+        job_description_equivalent = self._create_job_description_from_listing(job_listing)
 
         return GeneratedResume(
             user_profile=user_profile,
-            job_description=job_description,
+            job_description=job_description_equivalent,
             skill_matches=skill_matches,
             customized_summary=customized_summary,
             sections=sections,
@@ -66,10 +76,30 @@ class ResumeGeneratorAgent(BaseAgent):
             match_percentage=match_percentage,
         )
 
+    def _create_job_description_from_listing(self, job_listing: JobListing) -> JobDescription:
+        """Convert JobListing to JobDescription for compatibility with existing schema."""
+        # Create basic job requirements from skill matches if available
+        requirements = []
+        # We'll create a minimal job description since we don't have detailed requirements
+
+        return JobDescription(
+            title=job_listing.title,
+            company=job_listing.company,
+            location=job_listing.location,
+            job_type=job_listing.job_type,
+            salary_range=job_listing.salary,
+            description=job_listing.description or "",
+            responsibilities=[],
+            requirements=requirements,
+            preferred_qualifications=[],
+            company_culture=None,
+            benefits=[],
+        )
+
     def _generate_custom_summary(
         self,
         user_profile: UserProfile,
-        job_description: JobDescription,
+        job_listing: JobListing,
         skill_matches: list[SkillMatch],
     ) -> str:
         system_message = """
@@ -87,8 +117,8 @@ class ResumeGeneratorAgent(BaseAgent):
         top_skills = [match.skill for match in skill_matches if match.user_has_skill and match.match_score > 0.7][:5]
 
         user_message = f"""
-        Job Title: {job_description.title}
-        Company: {job_description.company}
+        Job Title: {job_listing.title}
+        Company: {job_listing.company}
         
         User's Background:
         - Current Summary: {user_profile.professional_summary or "No existing summary"}
@@ -96,8 +126,8 @@ class ResumeGeneratorAgent(BaseAgent):
         - Years of Experience: {len(user_profile.experience)} positions
         - Education: {user_profile.education[0].degree if user_profile.education else "Not specified"}
         
-        Job Requirements Summary:
-        {job_description.description[:500]}...
+        Job Description:
+        {job_listing.description[:500] if job_listing.description else "No description available"}...
         
         Create a tailored professional summary.
         """
@@ -111,7 +141,7 @@ class ResumeGeneratorAgent(BaseAgent):
     def _generate_resume_sections(
         self,
         user_profile: UserProfile,
-        job_description: JobDescription,
+        job_listing: JobListing,
         skill_matches: list[SkillMatch],
     ) -> list[ResumeSection]:
         sections = []
@@ -127,7 +157,7 @@ class ResumeGeneratorAgent(BaseAgent):
         sections.append(skills_section)
 
         # Experience Section (prioritized and tailored)
-        experience_section = self._create_experience_section(user_profile, job_description, skill_matches)
+        experience_section = self._create_experience_section(user_profile, skill_matches)
         sections.append(experience_section)
 
         # Education Section
@@ -191,7 +221,6 @@ class ResumeGeneratorAgent(BaseAgent):
     def _create_experience_section(
         self,
         user_profile: UserProfile,
-        job_description: JobDescription,
         skill_matches: list[SkillMatch],
     ) -> ResumeSection:
         experience_content = []
@@ -312,20 +341,11 @@ class ResumeGeneratorAgent(BaseAgent):
 
         return (total_score / max_possible_score) * 100 if max_possible_score > 0 else 0.0
 
-    def _generate_tailoring_notes(self, skill_matches: list[SkillMatch], job_description: JobDescription) -> list[str]:
+    def _generate_tailoring_notes(self, skill_matches: list[SkillMatch], job_listing: JobListing) -> list[str]:
         notes = []
 
         # Missing critical skills
-        missing_skills = [
-            match.skill
-            for match in skill_matches
-            if not match.user_has_skill
-            and any(
-                req.skill_or_requirement.lower() in match.skill.lower()
-                for req in job_description.requirements
-                if req.importance_weight >= 0.8
-            )
-        ]
+        missing_skills = [match.skill for match in skill_matches if not match.user_has_skill and match.match_score < 0.3]
 
         if missing_skills:
             notes.append(f"Consider developing skills in: {', '.join(missing_skills[:3])}")
@@ -337,8 +357,8 @@ class ResumeGeneratorAgent(BaseAgent):
             notes.append(f"Emphasize these strong skill matches: {', '.join(strong_matches[:3])}")
 
         # Industry keywords to include
-        if job_description.responsibilities:
-            notes.append("Include keywords from job responsibilities in your descriptions")
+        if job_listing.description:
+            notes.append("Include keywords from job description in your descriptions")
 
         return notes
 
