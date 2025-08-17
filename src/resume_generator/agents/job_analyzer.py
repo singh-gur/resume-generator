@@ -1,6 +1,8 @@
 import json
 from typing import Any
 
+from langchain.schema import BaseMessage
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import JobDescription, JobRequirement
 from resume_generator.workflows.state import WorkflowState
@@ -45,7 +47,8 @@ class JobAnalyzerAgent(BaseAgent):
             response = self.llm.invoke(messages)
 
             # Parse the JSON response
-            job_data = json.loads(response.content)
+            response_content = response.content if isinstance(response, BaseMessage) else str(response)
+            job_data = json.loads(response_content)  # type: ignore
 
             # Convert to Pydantic model
             job_description = self._parse_job_data(job_data)
@@ -84,4 +87,7 @@ class JobAnalyzerAgent(BaseAgent):
         )
 
     def process(self, state: dict[str, Any]) -> dict[str, Any]:
-        return self.analyze_job(state)  # type: ignore
+        # Convert dict to WorkflowState for the typed method
+        workflow_state: WorkflowState = state  # type: ignore
+        result = self.analyze_job(workflow_state)
+        return dict(result)

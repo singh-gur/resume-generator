@@ -1,5 +1,7 @@
 from typing import Any
 
+from langchain.schema import BaseMessage
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     GeneratedResume,
@@ -103,7 +105,8 @@ class ResumeGeneratorAgent(BaseAgent):
         messages = self.create_prompt(system_message, user_message)
         response = self.llm.invoke(messages)
 
-        return response.content.strip()
+        response_content = response.content if isinstance(response, BaseMessage) else str(response)
+        return response_content  # type: ignore
 
     def _generate_resume_sections(
         self,
@@ -340,4 +343,7 @@ class ResumeGeneratorAgent(BaseAgent):
         return notes
 
     def process(self, state: dict[str, Any]) -> dict[str, Any]:
-        return self.generate_resume(state)  # type: ignore
+        # Convert dict to WorkflowState for the typed method
+        workflow_state: WorkflowState = state  # type: ignore
+        result = self.generate_resume(workflow_state)
+        return dict(result)

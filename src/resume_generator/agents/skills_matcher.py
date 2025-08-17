@@ -1,6 +1,8 @@
 import json
 from typing import Any
 
+from langchain.schema import BaseMessage
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import JobDescription, SkillMatch, UserProfile
 from resume_generator.workflows.state import WorkflowState
@@ -101,7 +103,8 @@ class SkillsMatcherAgent(BaseAgent):
         response = self.llm.invoke(messages)
 
         # Parse the JSON response
-        matches_data = json.loads(response.content)
+        response_content = response.content if isinstance(response, BaseMessage) else str(response)
+        matches_data = json.loads(response_content)  # type: ignore
 
         # Convert to SkillMatch objects
         skill_matches = []
@@ -118,4 +121,7 @@ class SkillsMatcherAgent(BaseAgent):
         return skill_matches
 
     def process(self, state: dict[str, Any]) -> dict[str, Any]:
-        return self.match_skills(state)  # type: ignore
+        # Convert dict to WorkflowState for the typed method
+        workflow_state: WorkflowState = state  # type: ignore
+        result = self.match_skills(workflow_state)
+        return dict(result)

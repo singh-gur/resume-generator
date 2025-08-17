@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 from typing import Any
 
+from langchain.schema import BaseMessage
+
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import (
     Certification,
@@ -48,7 +50,8 @@ class ProfileExtractorAgent(BaseAgent):
             response = self.llm.invoke(messages)
 
             # Parse the JSON response
-            profile_data = json.loads(response.content)
+            response_content = response.content if isinstance(response, BaseMessage) else str(response)
+            profile_data = json.loads(response_content)  # type: ignore
 
             # Convert to Pydantic model
             user_profile = self._parse_profile_data(profile_data)
