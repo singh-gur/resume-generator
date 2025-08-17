@@ -1,27 +1,19 @@
 from abc import ABC, abstractmethod
-from langchain_core.language_models import BaseLLM
-from langchain.schema import HumanMessage, SystemMessage
+from os import getenv
 from typing import Any, Dict, Optional
-import os
+
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.language_models import BaseLLM
 
 
 class BaseAgent(ABC):
     def __init__(self, llm: Optional[BaseLLM] = None):
-        self.llm = llm or self._get_default_llm()
-
-    def _get_default_llm(self) -> BaseLLM:
-        try:
-            from langchain_openai import ChatOpenAI
-
-            return ChatOpenAI(
-                model="gpt-4o-mini",
-                temperature=0.1,
-                api_key=os.getenv("OPENAI_API_KEY"),
-            )
-        except ImportError:
-            raise ImportError(
-                "Please install langchain-openai: uv add langchain-openai"
-            )
+        self.llm = llm or ChatOpenAI(
+            model=getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            api_key=getenv("OPENAI_API_KEY"),
+            base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
+        )
 
     def create_prompt(self, system_message: str, user_message: str) -> list:
         return [
