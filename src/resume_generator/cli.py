@@ -73,37 +73,26 @@ def generate(
     output: str,
     output_format: str,
 ):
-    """Generate personalized resumes based on user profile and available job opportunities."""
+    """Generate a resume from a profile with job search context."""
 
     try:
-        # Read profile file
         profile_path = Path(profile)
         profile_content = profile_path.read_text(encoding="utf-8")
 
-        # Determine if it's JSON or text format
-        is_json_profile = False
-
-        try:
-            # Try to parse as JSON first
-            json.loads(profile_content)
-            is_json_profile = True
-            click.echo("📋 Detected JSON profile format")
-        except json.JSONDecodeError:
-            # It's a text profile
-            click.echo("📋 Detected text profile format")
+        # Simpler detection: use file extension
+        is_json_profile = profile_path.suffix.lower() == ".json"
+        click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
 
         click.echo("🚀 Starting resume generation workflow...")
         click.echo(f"🔍 Searching for jobs in: {location}")
         click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
 
-        # Initialize workflow
         workflow = create_resume_workflow()
 
-        # Prepare initial state with job search parameters
         initial_state: WorkflowState = {
-            "user_profile_raw": profile_content if not is_json_profile else None,
+            "user_profile_raw": None if is_json_profile else profile_content,
             "user_profile_json": profile_content if is_json_profile else None,
-            "job_description_raw": None,  # Will be populated by job search
+            "job_description_raw": None,
             "user_profile": None,
             "job_description": None,
             "job_matches": None,
@@ -111,58 +100,41 @@ def generate(
             "generated_resume": None,
             "errors": [],
             "step_completed": [],
-            # Add job search parameters to state for JobSearchAgent
             "job_search_location": location,
             "job_sites": list(job_sites),
             "max_results": max_results,
             "hours_old": hours_old,
         }
 
-        # Run workflow
-        click.echo("📝 Extracting user profile...")
         result = workflow.invoke(initial_state)
 
-        # Check for errors
-        if result.get("errors"):
+        errors = result.get("errors") or []
+        if errors:
             click.echo("❌ Errors occurred during processing:")
-            for error in result["errors"]:
+            for error in errors:
                 click.echo(f"  • {error}")
             raise click.Abort()
 
-        # Get generated resume
         generated_resume = result.get("generated_resume")
         if not generated_resume:
             click.echo("❌ Failed to generate resume")
             raise click.Abort()
 
-        # Save output
         output_path = Path(output)
-
-        if output_format == "json":
-            with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(generated_resume.model_dump(), f, indent=2, default=str)
-        elif output_format == "text":
-            formatted_resume = format_resume_as_text(generated_resume)
-            output_path.write_text(formatted_resume, encoding="utf-8")
-        elif output_format == "markdown":
-            formatted_resume = format_resume_as_markdown(generated_resume)
-            output_path.write_text(formatted_resume, encoding="utf-8")
+        output_path.write_text(render_resume(generated_resume, output_format), encoding="utf-8")
 
         click.echo("✅ Resume generated successfully!")
         click.echo(f"📄 Output saved to: {output_path}")
         click.echo(f"🎯 Match percentage: {generated_resume.match_percentage:.1f}%")
 
-        # Show tailoring notes
-        if generated_resume.tailoring_notes:
+        notes = getattr(generated_resume, "tailoring_notes", None) or []
+        if notes:
             click.echo("\n💡 Tailoring suggestions:")
-            for note in generated_resume.tailoring_notes:
+            for note in notes:
                 click.echo(f"  • {note}")
 
     except FileNotFoundError as e:
         click.echo(f"❌ Profile file not found: {e}")
-        raise click.Abort() from e
-    except json.JSONDecodeError as e:
-        click.echo(f"❌ Invalid JSON in profile file: {e}")
         raise click.Abort() from e
     except Exception as e:
         click.echo(f"❌ Unexpected error: {e}")
@@ -373,6 +345,15 @@ English (Native), Spanish (Conversational)
 
     click.echo(f"✅ Profile template created: {output}")
     click.echo("Edit this file with your information and use it with the --profile option.")
+
+
+def render_resume(resume, fmt: str) -> str:
+    """Render resume content into the requested format as a string."""
+    if fmt == "json":
+        return json.dumps(resume.model_dump(), indent=2, default=str)
+    if fmt == "text":
+        return format_resume_as_text(resume)
+    return format_resume_as_markdown(resume)
 
 
 def format_resume_as_text(resume) -> str:
