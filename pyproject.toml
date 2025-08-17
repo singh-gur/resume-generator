@@ -58,6 +58,8 @@ line-length = 135
 # Set the target Python version
 target-version = "py313"
 
+
+[tool.ruff.lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 select = [
     "E",     # pycodestyle errors
@@ -73,10 +75,11 @@ select = [
 ignore = [
     "W293"
 ]
+
 # Allow unused variables when their name starts with an underscore
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 # Set the maximum complexity
 max-complexity = 10
 
