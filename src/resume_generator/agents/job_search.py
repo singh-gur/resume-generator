@@ -4,12 +4,13 @@ from jobspy import scrape_jobs
 
 from resume_generator.agents.base import BaseAgent
 from resume_generator.models.schemas import JobListing, JobMatches, UserProfile
+from resume_generator.workflows.state import WorkflowState
 
 
 class JobSearchAgent(BaseAgent):
-    def search_jobs(self, state: dict[str, Any]) -> dict[str, Any]:
+    def search_jobs(self, state: WorkflowState) -> dict[str, Any]:
         try:
-            user_profile: UserProfile = state.get("user_profile")
+            user_profile: UserProfile | None = state["user_profile"]
             if not user_profile:
                 return {
                     **state,
@@ -105,4 +106,4 @@ class JobSearchAgent(BaseAgent):
         return any(indicator in location or indicator in description for indicator in remote_indicators)
 
     def process(self, state: dict[str, Any]) -> dict[str, Any]:
-        return self.search_jobs(state)
+        return self.search_jobs(state)  # type: ignore

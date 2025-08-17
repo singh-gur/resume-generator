@@ -146,13 +146,13 @@ def generate(
 
     except FileNotFoundError as e:
         click.echo(f"❌ Profile file not found: {e}")
-        raise click.Abort()
+        raise click.Abort() from e
     except json.JSONDecodeError as e:
         click.echo(f"❌ Invalid JSON in profile file: {e}")
-        raise click.Abort()
+        raise click.Abort() from e
     except Exception as e:
         click.echo(f"❌ Unexpected error: {e}")
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @cli.command()

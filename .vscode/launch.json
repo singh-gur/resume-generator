@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "Python Debugger: Run CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "generate", "--profile", ".ignore/example_profile.txt"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -16,10 +16,7 @@ class BaseAgent(ABC):
         api_key = getenv("OPENAI_API_KEY")
 
         if api_key is None:
-            raise ValueError(
-                "OPENAI_API_KEY environment variable is not set. "
-                "Please set it to use the OpenAI API."
-            )
+            raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it to use the OpenAI API.")
 
         self.llm = ChatOpenAI(
             model=getenv("OPENAI_MODEL", "gpt-4o-mini"),
