@@ -53,7 +53,26 @@ class SkillsMatcherAgent(BaseAgent):
         - Job title and description keywords
         
         Focus on the most important 8-10 skills/requirements for this specific job.
-        Return a JSON array of skill matches.
+        
+        IMPORTANT: Return ONLY a valid JSON array with no additional text or formatting. Each object must have this exact structure:
+        {
+            "skill": "string",
+            "user_has_skill": boolean,
+            "proficiency_level": "string or null",
+            "match_score": number,
+            "evidence": ["array", "of", "strings"]
+        }
+        
+        Example response format:
+        [
+            {
+                "skill": "Python",
+                "user_has_skill": true,
+                "proficiency_level": "advanced",
+                "match_score": 0.9,
+                "evidence": ["3 years Python experience at Company X", "Built web scraper using Python"]
+            }
+        ]
         """
 
         user_data = {
@@ -109,21 +128,49 @@ class SkillsMatcherAgent(BaseAgent):
         messages = self.create_prompt(system_message, user_message)
         response = self.llm.invoke(messages)
 
-        # Parse the JSON response
+        # Parse the JSON response with error handling
         response_content = response.content if isinstance(response, BaseMessage) else str(response)
-        matches_data = json.loads(response_content)  # type: ignore
 
-        # Convert to SkillMatch objects
+        # Ensure response_content is a string
+        if not isinstance(response_content, str):
+            response_content = str(response_content)
+
+        try:
+            # Clean response content - remove any markdown formatting or extra text
+            cleaned_content = response_content.strip()
+            if cleaned_content.startswith("```json"):
+                cleaned_content = cleaned_content[7:]
+            if cleaned_content.endswith("```"):
+                cleaned_content = cleaned_content[:-3]
+            cleaned_content = cleaned_content.strip()
+
+            matches_data = json.loads(cleaned_content)
+
+            # Ensure it's a list
+            if not isinstance(matches_data, list):
+                raise ValueError("Response is not a JSON array")
+
+        except (json.JSONDecodeError, ValueError) as e:
+            # Fallback: return empty list and log error
+            print(f"Failed to parse JSON response for skill matching: {e}")
+            print(f"Raw response: {response_content[:200]}...")
+            return []
+
+        # Convert to SkillMatch objects with validation
         skill_matches = []
         for match_data in matches_data:
-            skill_match = SkillMatch(
-                skill=match_data.get("skill", ""),
-                user_has_skill=match_data.get("user_has_skill", False),
-                proficiency_level=match_data.get("proficiency_level"),
-                match_score=match_data.get("match_score", 0.0),
-                evidence=match_data.get("evidence", []),
-            )
-            skill_matches.append(skill_match)
+            try:
+                skill_match = SkillMatch(
+                    skill=match_data.get("skill", ""),
+                    user_has_skill=match_data.get("user_has_skill", False),
+                    proficiency_level=match_data.get("proficiency_level"),
+                    match_score=float(match_data.get("match_score", 0.0)),
+                    evidence=match_data.get("evidence", []) if isinstance(match_data.get("evidence"), list) else [],
+                )
+                skill_matches.append(skill_match)
+            except Exception as e:
+                print(f"Failed to create SkillMatch from data {match_data}: {e}")
+                continue
 
         return skill_matches
 

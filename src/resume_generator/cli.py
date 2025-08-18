@@ -41,9 +41,9 @@ def cli():
 )
 @click.option(
     "--max-results",
-    default=20,
+    default=10,
     type=int,
-    help="Maximum number of jobs to search (default: 20)",
+    help="Maximum number of jobs to search (default: 10)",
 )
 @click.option(
     "--hours-old",
