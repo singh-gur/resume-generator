@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from langchain.schema import BaseMessage
@@ -40,11 +41,7 @@ class CoverLetterGeneratorAgent(BaseAgent):
             # Filter based on match threshold
             filtered_cover_letters = [cl for cl in all_generated_cover_letters if cl.match_percentage >= match_threshold]
 
-            # Log filtering results if threshold is applied
-            if match_threshold > 0:
-                discarded_count = len(all_generated_cover_letters) - len(filtered_cover_letters)
-                if discarded_count > 0:
-                    print(f"🔻 Filtered out {discarded_count} jobs below {match_threshold}% threshold")
+            # Note: Filtering results are logged in CLI, not in agent output
 
             state["generated_cover_letters"] = filtered_cover_letters
             state["step_completed"] = state.get("step_completed", []) + ["cover_letter_generation"]
@@ -116,10 +113,21 @@ class CoverLetterGeneratorAgent(BaseAgent):
         7. Ends with a strong call to action
         8. Is 3-4 paragraphs long and follows proper business letter format
         
+        IMPORTANT FORMATTING REQUIREMENTS:
+        - Include today's date at the top in "Month Day, Year" format (e.g., "January 18, 2025")
+        - Use proper business letter structure with date, recipient, salutation, body, and closing
+        - Do NOT include placeholder text like [Date], [Name], or [Address] - use actual values
+        - Do NOT include any debug information, analysis notes, or meta-commentary in the letter
+        - The output should be ONLY the final cover letter content, ready to send
+        
         Structure:
+        - Date line at top
+        - Recipient information (Hiring Manager, Company Name)
+        - Professional salutation (Dear Hiring Manager,)
         - Opening paragraph: Express interest and briefly introduce yourself
         - Middle paragraph(s): Highlight relevant experience and achievements that match job requirements
         - Closing paragraph: Reiterate interest and request for interview
+        - Professional closing (Sincerely, [Full Name])
         
         Focus on the skills and experiences that best match the job requirements and show concrete value.
         """
@@ -130,8 +138,13 @@ class CoverLetterGeneratorAgent(BaseAgent):
         # Get most relevant experience
         most_recent_experience = user_profile.experience[0] if user_profile.experience else None
 
+        # Get today's date in proper format
+        today = datetime.now().strftime("%B %d, %Y")
+
         user_message = f"""
-        Write a cover letter for the following job application:
+        Write a cover letter for the following job application.
+        
+        Today's date: {today}
         
         Job Information:
         - Job Title: {job_listing.title}

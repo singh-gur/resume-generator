@@ -150,10 +150,8 @@ class SkillsMatcherAgent(BaseAgent):
             if not isinstance(matches_data, list):
                 raise ValueError("Response is not a JSON array")
 
-        except (json.JSONDecodeError, ValueError) as e:
-            # Fallback: return empty list and log error
-            print(f"Failed to parse JSON response for skill matching: {e}")
-            print(f"Raw response: {response_content[:200]}...")
+        except (json.JSONDecodeError, ValueError):
+            # Fallback: return empty list on parsing error
             return []
 
         # Convert to SkillMatch objects with validation
@@ -168,8 +166,8 @@ class SkillsMatcherAgent(BaseAgent):
                     evidence=match_data.get("evidence", []) if isinstance(match_data.get("evidence"), list) else [],
                 )
                 skill_matches.append(skill_match)
-            except Exception as e:
-                print(f"Failed to create SkillMatch from data {match_data}: {e}")
+            except Exception:
+                # Skip invalid match data
                 continue
 
         return skill_matches

@@ -23,16 +23,8 @@ class JobSearchAgent(BaseAgent):
             max_results = state.get("max_results") or 20
             hours_old = state.get("hours_old") or 72
 
-            # Debug: Print the values being used
-            print("🔍 JobSearchAgent Debug:")
-            print(f"  max_results from state: {state.get('max_results')}")
-            print(f"  final max_results: {max_results}")
-            print(f"  job_sites: {job_sites}")
-            print(f"  location: {location}")
-
             # Use user-provided search term if available, otherwise generate from profile
             search_term = state.get("search_term") or self._generate_search_term(user_profile)
-            print(f"  search_term: {search_term}")
 
             # Determine if searching for remote jobs
             is_remote_search = location.lower() in ["remote", "anywhere", "global"]
