@@ -30,3 +30,4 @@ class WorkflowState(TypedDict):
     max_results: int | None
     hours_old: int | None
     search_term: str | None
+    match_threshold: float | None

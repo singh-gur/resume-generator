@@ -72,6 +72,12 @@ def cli():
     default="json",
     help="Output format",
 )
+@click.option(
+    "--match-threshold",
+    default=0.0,
+    type=click.FloatRange(0.0, 100.0),
+    help="Minimum match percentage to include job in results (0-100, default: 0)",
+)
 def generate(
     profile: str,
     location: str,
@@ -81,6 +87,7 @@ def generate(
     search_term: str,
     output: str,
     output_format: str,
+    match_threshold: float,
 ):
     """Generate a cover letter from a profile with job search context."""
     # Create a unique session ID for this workflow execution
@@ -104,10 +111,10 @@ def generate(
 
     try:
         profile_content, is_json_profile = _load_profile(profile)
-        _display_workflow_start_info(location, job_sites, max_results, search_term, is_json_profile)
+        _display_workflow_start_info(location, job_sites, max_results, search_term, is_json_profile, match_threshold)
 
         initial_state = _create_initial_state(
-            profile_content, is_json_profile, location, job_sites, max_results, hours_old, search_term
+            profile_content, is_json_profile, location, job_sites, max_results, hours_old, search_term, match_threshold
         )
 
         result = create_cover_letter_workflow().invoke(initial_state)
@@ -142,7 +149,9 @@ def _load_profile(profile_path: str) -> tuple[str, bool]:
     return content, is_json
 
 
-def _display_workflow_start_info(location: str, job_sites: tuple, max_results: int, search_term: str, is_json_profile: bool):
+def _display_workflow_start_info(
+    location: str, job_sites: tuple, max_results: int, search_term: str, is_json_profile: bool, match_threshold: float = 0.0
+):
     """Display workflow startup information."""
     click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
     click.echo("🚀 Starting cover letter generation workflow...")
@@ -150,10 +159,19 @@ def _display_workflow_start_info(location: str, job_sites: tuple, max_results: i
     click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
     if search_term:
         click.echo(f"🔍 Search term: {search_term}")
+    if match_threshold > 0:
+        click.echo(f"🎯 Minimum match threshold: {match_threshold}%")
 
 
 def _create_initial_state(
-    profile_content: str, is_json_profile: bool, location: str, job_sites: tuple, max_results: int, hours_old: int, search_term: str
+    profile_content: str,
+    is_json_profile: bool,
+    location: str,
+    job_sites: tuple,
+    max_results: int,
+    hours_old: int,
+    search_term: str,
+    match_threshold: float,
 ) -> WorkflowState:
     """Create initial workflow state."""
     return {
@@ -176,6 +194,7 @@ def _create_initial_state(
         "max_results": max_results,
         "hours_old": hours_old,
         "search_term": search_term,
+        "match_threshold": match_threshold,
     }
 
 
@@ -190,7 +209,12 @@ def _handle_workflow_result(result: dict, output: str, output_format: str):
 
     generated_cover_letters = result.get("generated_cover_letters")
     if not generated_cover_letters:
-        click.echo("❌ Failed to generate cover letters")
+        match_threshold = result.get("match_threshold", 0.0)
+        if match_threshold > 0:
+            click.echo(f"❌ No jobs found that meet the {match_threshold}% match threshold")
+            click.echo("💡 Try lowering the --match-threshold value to see more results")
+        else:
+            click.echo("❌ Failed to generate cover letters")
         raise click.Abort()
 
     click.echo(f"✅ Generated {len(generated_cover_letters)} tailored cover letters!")

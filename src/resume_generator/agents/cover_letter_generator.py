@@ -18,13 +18,14 @@ class CoverLetterGeneratorAgent(BaseAgent):
         try:
             user_profile = state.get("user_profile")
             job_skill_matches = state.get("job_skill_matches")
+            match_threshold = state.get("match_threshold") or 0.0
 
             if not user_profile or not job_skill_matches:
                 state["errors"] = state.get("errors", []) + ["Missing required data for cover letter generation"]
                 return state
 
             # Generate a cover letter for each job listing
-            generated_cover_letters = []
+            all_generated_cover_letters = []
             for job_match in job_skill_matches:
                 job_listing = job_match["job_listing"]
                 skill_matches = job_match["skill_matches"]
@@ -34,9 +35,18 @@ class CoverLetterGeneratorAgent(BaseAgent):
                     job_listing,  # type: ignore
                     skill_matches,  # type: ignore
                 )
-                generated_cover_letters.append(generated_cover_letter)
+                all_generated_cover_letters.append(generated_cover_letter)
 
-            state["generated_cover_letters"] = generated_cover_letters
+            # Filter based on match threshold
+            filtered_cover_letters = [cl for cl in all_generated_cover_letters if cl.match_percentage >= match_threshold]
+
+            # Log filtering results if threshold is applied
+            if match_threshold > 0:
+                discarded_count = len(all_generated_cover_letters) - len(filtered_cover_letters)
+                if discarded_count > 0:
+                    print(f"🔻 Filtered out {discarded_count} jobs below {match_threshold}% threshold")
+
+            state["generated_cover_letters"] = filtered_cover_letters
             state["step_completed"] = state.get("step_completed", []) + ["cover_letter_generation"]
 
         except Exception as e:

@@ -21,7 +21,9 @@
                 "--format",
                 "pdf",
                 "--job-sites",
-                "linkedin"
+                "linkedin",
+                "--match-threshold",
+                "80"
             ],
             "envFile": "${workspaceFolder}/.env"
         }
