@@ -29,4 +29,4 @@ class WorkflowState(TypedDict):
     job_sites: list[str] | None
     max_results: int | None
     hours_old: int | None
-    search_keywords: list[str] | None
+    search_term: str | None

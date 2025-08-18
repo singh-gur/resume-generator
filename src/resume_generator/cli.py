@@ -52,10 +52,9 @@ def cli():
     help="Only include jobs posted within this many hours (default: 72)",
 )
 @click.option(
-    "--keywords",
-    "-k",
-    multiple=True,
-    help="Search keywords for job search (can specify multiple, overrides profile-based keywords)",
+    "--search-term",
+    "-s",
+    help="Search term for job search (overrides profile-based search term generation)",
 )
 @click.option(
     "--output",
@@ -76,16 +75,18 @@ def generate(
     job_sites: tuple,
     max_results: int,
     hours_old: int,
-    keywords: tuple,
+    search_term: str,
     output: str,
     output_format: str,
 ):
     """Generate a cover letter from a profile with job search context."""
     try:
         profile_content, is_json_profile = _load_profile(profile)
-        _display_workflow_start_info(location, job_sites, max_results, keywords, is_json_profile)
+        _display_workflow_start_info(location, job_sites, max_results, search_term, is_json_profile)
 
-        initial_state = _create_initial_state(profile_content, is_json_profile, location, job_sites, max_results, hours_old, keywords)
+        initial_state = _create_initial_state(
+            profile_content, is_json_profile, location, job_sites, max_results, hours_old, search_term
+        )
 
         result = create_cover_letter_workflow().invoke(initial_state)
         _handle_workflow_result(result, output, output_format)
@@ -106,18 +107,18 @@ def _load_profile(profile_path: str) -> tuple[str, bool]:
     return content, is_json
 
 
-def _display_workflow_start_info(location: str, job_sites: tuple, max_results: int, keywords: tuple, is_json_profile: bool):
+def _display_workflow_start_info(location: str, job_sites: tuple, max_results: int, search_term: str, is_json_profile: bool):
     """Display workflow startup information."""
     click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
     click.echo("🚀 Starting cover letter generation workflow...")
     click.echo(f"🔍 Searching for jobs in: {location}")
     click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
-    if keywords:
-        click.echo(f"🔑 Keywords: {', '.join(keywords)}")
+    if search_term:
+        click.echo(f"🔍 Search term: {search_term}")
 
 
 def _create_initial_state(
-    profile_content: str, is_json_profile: bool, location: str, job_sites: tuple, max_results: int, hours_old: int, keywords: tuple
+    profile_content: str, is_json_profile: bool, location: str, job_sites: tuple, max_results: int, hours_old: int, search_term: str
 ) -> WorkflowState:
     """Create initial workflow state."""
     return {
@@ -139,7 +140,7 @@ def _create_initial_state(
         "job_sites": list(job_sites),
         "max_results": max_results,
         "hours_old": hours_old,
-        "search_keywords": list(keywords) if keywords else None,
+        "search_term": search_term,
     }
 
 

@@ -23,8 +23,8 @@ class JobSearchAgent(BaseAgent):
             max_results = state.get("max_results") or 20
             hours_old = state.get("hours_old") or 72
 
-            # Use user-provided keywords if available, otherwise generate from profile
-            search_keywords = state.get("search_keywords") or self._generate_search_keywords(user_profile)
+            # Use user-provided search term if available, otherwise generate from profile
+            search_term = state.get("search_term") or self._generate_search_term(user_profile)
 
             # Determine if searching for remote jobs
             is_remote_search = location.lower() in ["remote", "anywhere", "global"]
@@ -32,7 +32,7 @@ class JobSearchAgent(BaseAgent):
             # Search for jobs using jobspy
             jobs_df = scrape_jobs(
                 site_name=job_sites,
-                search_term=" ".join(search_keywords[:3]),  # Limit to top 3 keywords
+                search_term=search_term,
                 location=location if not is_remote_search else "Remote",
                 results_wanted=max_results,
                 hours_old=hours_old,
@@ -59,7 +59,7 @@ class JobSearchAgent(BaseAgent):
             # Create JobMatches object
             job_matches = JobMatches(
                 search_location=location,
-                search_keywords=search_keywords,
+                search_keywords=[search_term] if search_term else [],  # Keep as list for backwards compatibility
                 is_remote_search=is_remote_search,
                 jobs=job_listings,
                 total_results=len(job_listings),
@@ -72,25 +72,22 @@ class JobSearchAgent(BaseAgent):
             state["errors"] = state.get("errors", []) + [f"Job search failed: {str(e)}"]
         return state
 
-    def _generate_search_keywords(self, user_profile: UserProfile) -> list[str]:
-        keywords = []
+    def _generate_search_term(self, user_profile: UserProfile) -> str:
+        """Generate a search term from user profile."""
+        terms = []
 
-        # Add top skills
-        keywords.extend(user_profile.skills[:5])
+        # Add top skills (limit to 3)
+        if user_profile.skills:
+            terms.extend(user_profile.skills[:3])
 
-        # Add recent job titles from experience
+        # Add most recent job title if available
         if user_profile.experience:
-            recent_positions = [exp.position for exp in user_profile.experience[:2]]
-            keywords.extend(recent_positions)
+            recent_position = user_profile.experience[0].position
+            terms.append(recent_position)
 
-        # Add technologies from recent experience
-        for exp in user_profile.experience[:2]:
-            keywords.extend(exp.technologies_used[:3])
-
-        # Remove duplicates and empty strings
-        keywords = list(set([k.strip() for k in keywords if k.strip()]))
-
-        return keywords[:10]  # Limit to top 10 keywords
+        # Join terms with spaces, limit to reasonable length
+        search_term = " ".join(terms[:2])  # Use top 2 most relevant terms
+        return search_term or "Software Engineer"  # Default fallback
 
     def _is_remote_job(self, job_row) -> bool:
         location = str(job_row.get("location", "")).lower()
