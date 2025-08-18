@@ -19,7 +19,7 @@ class BaseAgent(ABC):
             raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it to use the OpenAI API.")
 
         self.llm = ChatOpenAI(
-            model=getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=getenv("OPENAI_MODEL", "openai/gpt-5-mini"),
             api_key=SecretStr(api_key),
             base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
         )

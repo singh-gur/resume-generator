@@ -10,12 +10,16 @@
                 "generate",
                 "--profile",
                 ".ignore/profile_template.json",
-                "--search-term",
+                "-s",
                 "senior software engineer",
                 "-l",
-                "Philadelphia, PA",
+                "Philadelphia",
                 "-o",
-                ".ignore/cover_letters"
+                ".ignore/cover_letters",
+                "--max-results",
+                "5",
+                "--format",
+                "pdf"
             ],
             "envFile": "${workspaceFolder}/.env"
         }

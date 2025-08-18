@@ -21,81 +21,90 @@ class CoverLetterPDFGenerator:
 
     def _setup_custom_styles(self):
         """Setup custom paragraph styles for the PDF."""
-        # Header style for name
-        self.styles.add(
-            ParagraphStyle(
-                name="HeaderName",
-                parent=self.styles["Heading1"],
-                fontSize=18,
-                textColor=colors.HexColor("#2C3E50"),
-                spaceAfter=6,
-                alignment=0,  # Left align
+        # Check if styles are already added to avoid duplication
+        style_names = [style.name for style in self.styles.byName.values()]
+        
+        if "HeaderName" not in style_names:
+            # Header style for name
+            self.styles.add(
+                ParagraphStyle(
+                    name="HeaderName",
+                    parent=self.styles["Heading1"],
+                    fontSize=18,
+                    textColor=colors.HexColor("#2C3E50"),
+                    spaceAfter=6,
+                    alignment=0,  # Left align
+                )
             )
-        )
 
-        # Contact info style
-        self.styles.add(
-            ParagraphStyle(
-                name="ContactInfo",
-                parent=self.styles["Normal"],
-                fontSize=10,
-                textColor=colors.HexColor("#34495E"),
-                spaceAfter=12,
-                alignment=0,
+        if "ContactInfo" not in style_names:
+            # Contact info style
+            self.styles.add(
+                ParagraphStyle(
+                    name="ContactInfo",
+                    parent=self.styles["Normal"],
+                    fontSize=10,
+                    textColor=colors.HexColor("#34495E"),
+                    spaceAfter=12,
+                    alignment=0,
+                )
             )
-        )
 
-        # Job info style
-        self.styles.add(
-            ParagraphStyle(
-                name="JobInfo",
-                parent=self.styles["Heading2"],
-                fontSize=14,
-                textColor=colors.HexColor("#2C3E50"),
-                spaceAfter=12,
-                spaceBefore=12,
-                alignment=0,
+        if "JobInfo" not in style_names:
+            # Job info style
+            self.styles.add(
+                ParagraphStyle(
+                    name="JobInfo",
+                    parent=self.styles["Heading2"],
+                    fontSize=14,
+                    textColor=colors.HexColor("#2C3E50"),
+                    spaceAfter=12,
+                    spaceBefore=12,
+                    alignment=0,
+                )
             )
-        )
 
-        # Date style
-        self.styles.add(
-            ParagraphStyle(
-                name="DateStyle",
-                parent=self.styles["Normal"],
-                fontSize=10,
-                textColor=colors.HexColor("#7F8C8D"),
-                spaceAfter=18,
-                alignment=2,  # Right align
+        if "DateStyle" not in style_names:
+            # Date style
+            self.styles.add(
+                ParagraphStyle(
+                    name="DateStyle",
+                    parent=self.styles["Normal"],
+                    fontSize=10,
+                    textColor=colors.HexColor("#7F8C8D"),
+                    spaceAfter=18,
+                    alignment=2,  # Right align
+                )
             )
-        )
 
-        # Body text style
-        self.styles.add(
-            ParagraphStyle(
-                name="BodyText",
-                parent=self.styles["Normal"],
-                fontSize=11,
-                textColor=colors.HexColor("#2C3E50"),
-                spaceAfter=12,
-                spaceBefore=6,
-                leading=16,
-                alignment=4,  # Justify
+        if "BodyText" not in style_names:
+            # Body text style
+            self.styles.add(
+                ParagraphStyle(
+                    name="BodyText",
+                    parent=self.styles["Normal"],
+                    fontSize=11,
+                    textColor=colors.HexColor("#2C3E50"),
+                    spaceAfter=12,
+                    spaceBefore=6,
+                    leading=16,
+                    alignment=4,  # Justify
+                )
             )
-        )
 
-        # Signature style
-        self.styles.add(
-            ParagraphStyle(
-                name="Signature",
-                parent=self.styles["Normal"],
-                fontSize=11,
-                textColor=colors.HexColor("#2C3E50"),
-                spaceAfter=6,
-                spaceBefore=24,
-                alignment=0,
+        if "Signature" not in style_names:
+            # Signature style
+            self.styles.add(
+                ParagraphStyle(
+                    name="Signature",
+                    parent=self.styles["Normal"],
+                    fontSize=11,
+                    textColor=colors.HexColor("#2C3E50"),
+                    spaceAfter=6,
+                    spaceBefore=24,
+                    alignment=0,
+                )
             )
-        )
 
     def generate_pdf(self, cover_letter: GeneratedCoverLetter, output_path: str) -> str:
         """Generate a PDF cover letter and return the output path."""
