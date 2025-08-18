@@ -1,8 +1,10 @@
 import json
+import uuid
 from pathlib import Path
 
 import click
 
+from resume_generator.observability import create_trace, flush_langfuse, is_langfuse_enabled
 from resume_generator.utils import generate_cover_letter_pdf
 from resume_generator.workflows.graph import create_cover_letter_workflow
 from resume_generator.workflows.state import WorkflowState
@@ -81,6 +83,25 @@ def generate(
     output_format: str,
 ):
     """Generate a cover letter from a profile with job search context."""
+    # Create a unique session ID for this workflow execution
+    session_id = str(uuid.uuid4())
+
+    # Initialize Langfuse trace if enabled
+    trace = None
+    if is_langfuse_enabled():
+        trace = create_trace(
+            name="cover_letter_generation",
+            session_id=session_id,
+            metadata={
+                "location": location,
+                "job_sites": list(job_sites),
+                "max_results": max_results,
+                "search_term": search_term,
+                "output_format": output_format,
+                "profile_type": "json" if search_term else "text",
+            },
+        )
+
     try:
         profile_content, is_json_profile = _load_profile(profile)
         _display_workflow_start_info(location, job_sites, max_results, search_term, is_json_profile)
@@ -92,12 +113,25 @@ def generate(
         result = create_cover_letter_workflow().invoke(initial_state)
         _handle_workflow_result(result, output, output_format)
 
+        # Log success information
+        if trace:
+            generated_count = len(result.get("generated_cover_letters", []))
+            print(f"✅ Workflow completed: {generated_count} cover letters generated")
+
     except FileNotFoundError as e:
+        if trace:
+            print(f"❌ Workflow failed: Profile file not found - {e}")
         click.echo(f"❌ Profile file not found: {e}")
         raise click.Abort() from e
     except Exception as e:
+        if trace:
+            print(f"❌ Workflow failed: Unexpected error - {e}")
         click.echo(f"❌ Unexpected error: {e}")
         raise click.Abort() from e
+    finally:
+        # Flush any pending Langfuse events
+        if is_langfuse_enabled():
+            flush_langfuse()
 
 
 def _load_profile(profile_path: str) -> tuple[str, bool]:

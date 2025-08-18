@@ -23,7 +23,7 @@ class CoverLetterPDFGenerator:
         """Setup custom paragraph styles for the PDF."""
         # Check if styles are already added to avoid duplication
         style_names = [style.name for style in self.styles.byName.values()]
-        
+
         if "HeaderName" not in style_names:
             # Header style for name
             self.styles.add(

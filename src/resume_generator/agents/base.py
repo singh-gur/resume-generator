@@ -7,6 +7,8 @@ from langchain_core.language_models import BaseLLM
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
+from resume_generator.observability import get_langfuse_callback
+
 
 class BaseAgent(ABC):
     def __init__(self, llm: BaseLLM | None = None):
@@ -18,10 +20,17 @@ class BaseAgent(ABC):
         if api_key is None:
             raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it to use the OpenAI API.")
 
+        # Get Langfuse callback for tracing
+        callbacks = []
+        langfuse_callback = get_langfuse_callback()
+        if langfuse_callback:
+            callbacks.append(langfuse_callback)
+
         self.llm = ChatOpenAI(
             model=getenv("OPENAI_MODEL", "openai/gpt-5-mini"),
             api_key=SecretStr(api_key),
             base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
+            callbacks=callbacks,
         )
 
     def create_prompt(self, system_message: str, user_message: str) -> list:

@@ -52,6 +52,12 @@ Centralized configuration management for API keys, models, and other settings.
 - **main.py** - Simple entry point that imports and calls the CLI
 - **src/resume_generator/cli.py** - Click-based CLI interface with commands for generation and template creation
 
+### Observability (src/resume_generator/observability.py)
+- **Langfuse Integration** - Automatic LLM call tracing and workflow monitoring
+- **BaseAgent Tracing** - All agent LLM calls are automatically traced when Langfuse is configured
+- **Workflow-Level Spans** - Complete cover letter generation workflows are tracked with metadata
+- **Performance Metrics** - Track token usage, latency, and success rates across the multi-agent workflow
+
 ## Key Dependencies
 - **LangChain** - LLM framework and agent orchestration
 - **LangGraph** - Workflow and state graph management  
@@ -62,5 +68,10 @@ Centralized configuration management for API keys, models, and other settings.
 
 ## Environment Variables
 - `OPENAI_API_KEY` - Required for LLM access
-- `OPENAI_MODEL` - Model to use (default: gpt-4o-mini)
+- `OPENAI_MODEL` - Model to use (default: openai/gpt-5-mini)
 - `OPENAI_BASE_URL` - API endpoint (default: https://openrouter.ai/api/v1)
+
+### Observability (Optional)
+- `LANGFUSE_PUBLIC_KEY` - Langfuse public key for LLM call tracing
+- `LANGFUSE_SECRET_KEY` - Langfuse secret key for LLM call tracing  
+- `LANGFUSE_HOST` - Langfuse host URL (default: https://cloud.langfuse.com)
