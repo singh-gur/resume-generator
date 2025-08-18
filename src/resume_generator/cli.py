@@ -52,6 +52,12 @@ def cli():
     help="Only include jobs posted within this many hours (default: 72)",
 )
 @click.option(
+    "--keywords",
+    "-k",
+    multiple=True,
+    help="Search keywords for job search (can specify multiple, overrides profile-based keywords)",
+)
+@click.option(
     "--output",
     "-o",
     default="generated_cover_letter.json",
@@ -70,85 +76,19 @@ def generate(
     job_sites: tuple,
     max_results: int,
     hours_old: int,
+    keywords: tuple,
     output: str,
     output_format: str,
 ):
     """Generate a cover letter from a profile with job search context."""
-
     try:
-        profile_path = Path(profile)
-        profile_content = profile_path.read_text(encoding="utf-8")
+        profile_content, is_json_profile = _load_profile(profile)
+        _display_workflow_start_info(location, job_sites, max_results, keywords, is_json_profile)
 
-        # Simpler detection: use file extension
-        is_json_profile = profile_path.suffix.lower() == ".json"
-        click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
+        initial_state = _create_initial_state(profile_content, is_json_profile, location, job_sites, max_results, hours_old, keywords)
 
-        click.echo("🚀 Starting cover letter generation workflow...")
-        click.echo(f"🔍 Searching for jobs in: {location}")
-        click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
-
-        workflow = create_cover_letter_workflow()
-
-        initial_state: WorkflowState = {
-            "user_profile_raw": None if is_json_profile else profile_content,
-            "user_profile_json": profile_content if is_json_profile else None,
-            "job_description_raw": None,
-            "user_profile": None,
-            "job_description": None,
-            "job_matches": None,
-            "job_skill_matches": None,
-            "skill_matches": None,
-            "generated_resume": None,
-            "generated_resumes": None,
-            "generated_cover_letter": None,
-            "generated_cover_letters": None,
-            "errors": [],
-            "step_completed": [],
-            "job_search_location": location,
-            "job_sites": list(job_sites),
-            "max_results": max_results,
-            "hours_old": hours_old,
-        }
-
-        result = workflow.invoke(initial_state)
-
-        errors = result.get("errors") or []
-        if errors:
-            click.echo("❌ Errors occurred during processing:")
-            for error in errors:
-                click.echo(f"  • {error}")
-            raise click.Abort()
-
-        generated_cover_letters = result.get("generated_cover_letters")
-        if not generated_cover_letters:
-            click.echo("❌ Failed to generate cover letters")
-            raise click.Abort()
-
-        click.echo(f"✅ Generated {len(generated_cover_letters)} tailored cover letters!")
-
-        # Save each cover letter with a unique filename
-        for i, cover_letter in enumerate(generated_cover_letters):
-            output_path = Path(output)
-            if len(generated_cover_letters) > 1:
-                # Add index to filename for multiple cover letters
-                stem = output_path.stem
-                suffix = output_path.suffix
-                output_path = output_path.with_name(f"{stem}_{i + 1}{suffix}")
-
-            output_path.write_text(render_cover_letter(cover_letter, output_format), encoding="utf-8")
-
-            job_info = f"{cover_letter.job_description.title} at {cover_letter.job_description.company}"
-            click.echo(f"📄 Cover Letter {i + 1}: {job_info}")
-            click.echo(f"   📁 Saved to: {output_path}")
-            click.echo(f"   🎯 Match: {cover_letter.match_percentage:.1f}%")
-
-        # Show tailoring suggestions from the best matching cover letter
-        best_cover_letter = max(generated_cover_letters, key=lambda cl: cl.match_percentage)
-        notes = getattr(best_cover_letter, "tailoring_notes", None) or []
-        if notes:
-            click.echo(f"\n💡 Tailoring suggestions (from best match - {best_cover_letter.match_percentage:.1f}%):")
-            for note in notes:
-                click.echo(f"  • {note}")
+        result = create_cover_letter_workflow().invoke(initial_state)
+        _handle_workflow_result(result, output, output_format)
 
     except FileNotFoundError as e:
         click.echo(f"❌ Profile file not found: {e}")
@@ -156,6 +96,96 @@ def generate(
     except Exception as e:
         click.echo(f"❌ Unexpected error: {e}")
         raise click.Abort() from e
+
+
+def _load_profile(profile_path: str) -> tuple[str, bool]:
+    """Load profile content and detect format."""
+    path = Path(profile_path)
+    content = path.read_text(encoding="utf-8")
+    is_json = path.suffix.lower() == ".json"
+    return content, is_json
+
+
+def _display_workflow_start_info(location: str, job_sites: tuple, max_results: int, keywords: tuple, is_json_profile: bool):
+    """Display workflow startup information."""
+    click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
+    click.echo("🚀 Starting cover letter generation workflow...")
+    click.echo(f"🔍 Searching for jobs in: {location}")
+    click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
+    if keywords:
+        click.echo(f"🔑 Keywords: {', '.join(keywords)}")
+
+
+def _create_initial_state(
+    profile_content: str, is_json_profile: bool, location: str, job_sites: tuple, max_results: int, hours_old: int, keywords: tuple
+) -> WorkflowState:
+    """Create initial workflow state."""
+    return {
+        "user_profile_raw": None if is_json_profile else profile_content,
+        "user_profile_json": profile_content if is_json_profile else None,
+        "job_description_raw": None,
+        "user_profile": None,
+        "job_description": None,
+        "job_matches": None,
+        "job_skill_matches": None,
+        "skill_matches": None,
+        "generated_resume": None,
+        "generated_resumes": None,
+        "generated_cover_letter": None,
+        "generated_cover_letters": None,
+        "errors": [],
+        "step_completed": [],
+        "job_search_location": location,
+        "job_sites": list(job_sites),
+        "max_results": max_results,
+        "hours_old": hours_old,
+        "search_keywords": list(keywords) if keywords else None,
+    }
+
+
+def _handle_workflow_result(result: dict, output: str, output_format: str):
+    """Handle workflow results and save output."""
+    errors = result.get("errors") or []
+    if errors:
+        click.echo("❌ Errors occurred during processing:")
+        for error in errors:
+            click.echo(f"  • {error}")
+        raise click.Abort()
+
+    generated_cover_letters = result.get("generated_cover_letters")
+    if not generated_cover_letters:
+        click.echo("❌ Failed to generate cover letters")
+        raise click.Abort()
+
+    click.echo(f"✅ Generated {len(generated_cover_letters)} tailored cover letters!")
+    _save_cover_letters(generated_cover_letters, output, output_format)
+    _show_tailoring_suggestions(generated_cover_letters)
+
+
+def _save_cover_letters(cover_letters: list, output: str, output_format: str):
+    """Save cover letters to files."""
+    for i, cover_letter in enumerate(cover_letters):
+        output_path = Path(output)
+        if len(cover_letters) > 1:
+            stem, suffix = output_path.stem, output_path.suffix
+            output_path = output_path.with_name(f"{stem}_{i + 1}{suffix}")
+
+        output_path.write_text(render_cover_letter(cover_letter, output_format), encoding="utf-8")
+
+        job_info = f"{cover_letter.job_description.title} at {cover_letter.job_description.company}"
+        click.echo(f"📄 Cover Letter {i + 1}: {job_info}")
+        click.echo(f"   📁 Saved to: {output_path}")
+        click.echo(f"   🎯 Match: {cover_letter.match_percentage:.1f}%")
+
+
+def _show_tailoring_suggestions(cover_letters: list):
+    """Show tailoring suggestions from the best matching cover letter."""
+    best_cover_letter = max(cover_letters, key=lambda cl: cl.match_percentage)
+    notes = getattr(best_cover_letter, "tailoring_notes", None) or []
+    if notes:
+        click.echo(f"\n💡 Tailoring suggestions (from best match - {best_cover_letter.match_percentage:.1f}%):")
+        for note in notes:
+            click.echo(f"  • {note}")
 
 
 @cli.command()

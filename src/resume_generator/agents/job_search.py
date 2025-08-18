@@ -23,8 +23,8 @@ class JobSearchAgent(BaseAgent):
             max_results = state.get("max_results") or 20
             hours_old = state.get("hours_old") or 72
 
-            # Generate search keywords from skills and experience
-            search_keywords = self._generate_search_keywords(user_profile)
+            # Use user-provided keywords if available, otherwise generate from profile
+            search_keywords = state.get("search_keywords") or self._generate_search_keywords(user_profile)
 
             # Determine if searching for remote jobs
             is_remote_search = location.lower() in ["remote", "anywhere", "global"]
