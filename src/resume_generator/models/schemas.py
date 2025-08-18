@@ -121,3 +121,12 @@ class GeneratedResume(BaseModel):
     sections: list[ResumeSection]
     tailoring_notes: list[str] = Field(default_factory=list)
     match_percentage: float = Field(ge=0.0, le=100.0)
+
+
+class GeneratedCoverLetter(BaseModel):
+    user_profile: UserProfile
+    job_description: JobDescription
+    skill_matches: list[SkillMatch]
+    cover_letter_content: str
+    tailoring_notes: list[str] = Field(default_factory=list)
+    match_percentage: float = Field(ge=0.0, le=100.0)

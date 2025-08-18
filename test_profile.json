@@ -1,0 +1,138 @@
+{
+  "full_name": "John Doe",
+  "contact_info": {
+    "email": "john.doe@email.com",
+    "phone": "(555) 123-4567",
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "github": "https://github.com/johndoe",
+    "portfolio": "https://johndoe.dev",
+    "location": "San Francisco, CA"
+  },
+  "professional_summary": "Experienced software engineer with 5+ years of experience in full-stack development. Proficient in Python, JavaScript, and cloud technologies. Strong background in building scalable web applications and working in agile environments.",
+  "skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Java",
+    "React",
+    "Node.js",
+    "Django",
+    "Flask",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "AWS",
+    "Docker",
+    "Kubernetes",
+    "Git",
+    "Jenkins",
+    "JIRA"
+  ],
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "degree": "Bachelor of Science",
+      "field_of_study": "Computer Science",
+      "graduation_date": "2020-05-01",
+      "gpa": 3.7,
+      "relevant_coursework": [
+        "Data Structures",
+        "Algorithms",
+        "Database Systems",
+        "Software Engineering"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "company": "TechCorp Inc.",
+      "position": "Senior Software Engineer",
+      "start_date": "2022-01-01",
+      "end_date": null,
+      "description": "Lead development of microservices architecture serving 1M+ users daily. Implement CI/CD pipelines and mentor junior developers.",
+      "key_achievements": [
+        "Led development of microservices architecture serving 1M+ users daily",
+        "Implemented CI/CD pipelines reducing deployment time by 50%",
+        "Mentored junior developers and conducted code reviews"
+      ],
+      "technologies_used": [
+        "Python",
+        "Django",
+        "AWS",
+        "Docker",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "company": "StartupXYZ",
+      "position": "Software Engineer",
+      "start_date": "2020-06-01",
+      "end_date": "2021-12-01",
+      "description": "Developed React-based frontend applications and built RESTful APIs using Node.js.",
+      "key_achievements": [
+        "Developed React-based frontend applications",
+        "Built RESTful APIs using Node.js and Express",
+        "Collaborated with design team to implement responsive UI components"
+      ],
+      "technologies_used": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "JavaScript"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "E-commerce Platform",
+      "description": "Built full-stack e-commerce application with React and Django",
+      "technologies_used": [
+        "React",
+        "Django",
+        "PostgreSQL",
+        "AWS",
+        "Docker"
+      ],
+      "url": "https://github.com/johndoe/ecommerce-platform",
+      "achievements": [
+        "Implemented payment processing with Stripe integration",
+        "Deployed on AWS with auto-scaling capabilities"
+      ]
+    },
+    {
+      "name": "Task Management App",
+      "description": "Developed real-time task management application",
+      "technologies_used": [
+        "React",
+        "Node.js",
+        "Socket.io",
+        "MongoDB"
+      ],
+      "url": "https://github.com/johndoe/task-manager",
+      "achievements": [
+        "Implemented WebSocket connections for live updates",
+        "Used Redux for state management"
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect - Associate",
+      "issuer": "Amazon Web Services",
+      "issue_date": "2023-01-01",
+      "expiry_date": "2026-01-01",
+      "credential_url": "https://aws.amazon.com/certification/verify"
+    },
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation",
+      "issue_date": "2022-01-01",
+      "expiry_date": "2025-01-01",
+      "credential_url": null
+    }
+  ],
+  "languages": [
+    "English (Native)",
+    "Spanish (Conversational)"
+  ]
+}

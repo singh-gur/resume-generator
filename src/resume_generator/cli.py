@@ -3,16 +3,16 @@ from pathlib import Path
 
 import click
 
-from resume_generator.workflows.graph import create_resume_workflow
+from resume_generator.workflows.graph import create_cover_letter_workflow
 from resume_generator.workflows.state import WorkflowState
 
 
 @click.group()
 @click.version_option(version="1.0.0")
 def cli():
-    """AI-powered resume generator using LangChain and LangGraph.
+    """AI-powered cover letter generator using LangChain and LangGraph.
 
-    Generate personalized resumes by analyzing user profiles and searching for
+    Generate personalized cover letters by analyzing user profiles and searching for
     available job opportunities through multiple specialized agents.
     """
     pass
@@ -54,8 +54,8 @@ def cli():
 @click.option(
     "--output",
     "-o",
-    default="generated_resume.json",
-    help="Output file path for generated resume",
+    default="generated_cover_letter.json",
+    help="Output file path for generated cover letter",
 )
 @click.option(
     "--format",
@@ -73,7 +73,7 @@ def generate(
     output: str,
     output_format: str,
 ):
-    """Generate a resume from a profile with job search context."""
+    """Generate a cover letter from a profile with job search context."""
 
     try:
         profile_path = Path(profile)
@@ -83,11 +83,11 @@ def generate(
         is_json_profile = profile_path.suffix.lower() == ".json"
         click.echo("📋 Detected JSON profile format" if is_json_profile else "📋 Detected text profile format")
 
-        click.echo("🚀 Starting resume generation workflow...")
+        click.echo("🚀 Starting cover letter generation workflow...")
         click.echo(f"🔍 Searching for jobs in: {location}")
         click.echo(f"📊 Max results: {max_results}, Sites: {', '.join(job_sites)}")
 
-        workflow = create_resume_workflow()
+        workflow = create_cover_letter_workflow()
 
         initial_state: WorkflowState = {
             "user_profile_raw": None if is_json_profile else profile_content,
@@ -100,6 +100,8 @@ def generate(
             "skill_matches": None,
             "generated_resume": None,
             "generated_resumes": None,
+            "generated_cover_letter": None,
+            "generated_cover_letters": None,
             "errors": [],
             "step_completed": [],
             "job_search_location": location,
@@ -117,34 +119,34 @@ def generate(
                 click.echo(f"  • {error}")
             raise click.Abort()
 
-        generated_resumes = result.get("generated_resumes")
-        if not generated_resumes:
-            click.echo("❌ Failed to generate resumes")
+        generated_cover_letters = result.get("generated_cover_letters")
+        if not generated_cover_letters:
+            click.echo("❌ Failed to generate cover letters")
             raise click.Abort()
 
-        click.echo(f"✅ Generated {len(generated_resumes)} tailored resumes!")
+        click.echo(f"✅ Generated {len(generated_cover_letters)} tailored cover letters!")
 
-        # Save each resume with a unique filename
-        for i, resume in enumerate(generated_resumes):
+        # Save each cover letter with a unique filename
+        for i, cover_letter in enumerate(generated_cover_letters):
             output_path = Path(output)
-            if len(generated_resumes) > 1:
-                # Add index to filename for multiple resumes
+            if len(generated_cover_letters) > 1:
+                # Add index to filename for multiple cover letters
                 stem = output_path.stem
                 suffix = output_path.suffix
                 output_path = output_path.with_name(f"{stem}_{i + 1}{suffix}")
 
-            output_path.write_text(render_resume(resume, output_format), encoding="utf-8")
+            output_path.write_text(render_cover_letter(cover_letter, output_format), encoding="utf-8")
 
-            job_info = f"{resume.job_description.title} at {resume.job_description.company}"
-            click.echo(f"📄 Resume {i + 1}: {job_info}")
+            job_info = f"{cover_letter.job_description.title} at {cover_letter.job_description.company}"
+            click.echo(f"📄 Cover Letter {i + 1}: {job_info}")
             click.echo(f"   📁 Saved to: {output_path}")
-            click.echo(f"   🎯 Match: {resume.match_percentage:.1f}%")
+            click.echo(f"   🎯 Match: {cover_letter.match_percentage:.1f}%")
 
-        # Show tailoring suggestions from the best matching resume
-        best_resume = max(generated_resumes, key=lambda r: r.match_percentage)
-        notes = getattr(best_resume, "tailoring_notes", None) or []
+        # Show tailoring suggestions from the best matching cover letter
+        best_cover_letter = max(generated_cover_letters, key=lambda cl: cl.match_percentage)
+        notes = getattr(best_cover_letter, "tailoring_notes", None) or []
         if notes:
-            click.echo(f"\n💡 Tailoring suggestions (from best match - {best_resume.match_percentage:.1f}%):")
+            click.echo(f"\n💡 Tailoring suggestions (from best match - {best_cover_letter.match_percentage:.1f}%):")
             for note in notes:
                 click.echo(f"  • {note}")
 
@@ -362,6 +364,15 @@ English (Native), Spanish (Conversational)
     click.echo("Edit this file with your information and use it with the --profile option.")
 
 
+def render_cover_letter(cover_letter, fmt: str) -> str:
+    """Render cover letter content into the requested format as a string."""
+    if fmt == "json":
+        return json.dumps(cover_letter.model_dump(), indent=2, default=str)
+    if fmt == "text":
+        return format_cover_letter_as_text(cover_letter)
+    return format_cover_letter_as_markdown(cover_letter)
+
+
 def render_resume(resume, fmt: str) -> str:
     """Render resume content into the requested format as a string."""
     if fmt == "json":
@@ -420,6 +431,47 @@ def format_resume_as_markdown(resume) -> str:
 
     # Match info
     sections.append(f"**Job Match:** {resume.match_percentage:.1f}%")
+
+    return "\n".join(sections)
+
+
+def format_cover_letter_as_text(cover_letter) -> str:
+    """Format the generated cover letter as plain text."""
+    sections = []
+
+    # Header with job info
+    sections.append(f"COVER LETTER FOR: {cover_letter.job_description.title}")
+    sections.append(f"COMPANY: {cover_letter.job_description.company}")
+    sections.append("=" * 50)
+    sections.append("")
+
+    # Cover letter content
+    sections.append(cover_letter.cover_letter_content)
+    sections.append("")
+
+    # Match info
+    sections.append(f"JOB MATCH: {cover_letter.match_percentage:.1f}%")
+
+    return "\n".join(sections)
+
+
+def format_cover_letter_as_markdown(cover_letter) -> str:
+    """Format the generated cover letter as Markdown."""
+    sections = []
+
+    # Header with job info
+    sections.append("# Cover Letter")
+    sections.append(f"**Position:** {cover_letter.job_description.title}")
+    sections.append(f"**Company:** {cover_letter.job_description.company}")
+    sections.append("")
+
+    # Cover letter content
+    sections.append("## Cover Letter")
+    sections.append(cover_letter.cover_letter_content)
+    sections.append("")
+
+    # Match info
+    sections.append(f"**Job Match:** {cover_letter.match_percentage:.1f}%")
 
     return "\n".join(sections)
 

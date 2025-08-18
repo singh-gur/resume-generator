@@ -1,6 +1,7 @@
 from typing import TypedDict
 
 from resume_generator.models.schemas import (
+    GeneratedCoverLetter,
     GeneratedResume,
     JobDescription,
     JobMatches,
@@ -20,6 +21,8 @@ class WorkflowState(TypedDict):
     skill_matches: list[SkillMatch] | None  # Kept for backwards compatibility
     generated_resume: GeneratedResume | None  # Kept for backwards compatibility
     generated_resumes: list[GeneratedResume] | None  # New field for multiple resumes
+    generated_cover_letter: GeneratedCoverLetter | None  # Single cover letter for backwards compatibility
+    generated_cover_letters: list[GeneratedCoverLetter] | None  # New field for multiple cover letters
     errors: list[str]
     step_completed: list[str]
     job_search_location: str | None

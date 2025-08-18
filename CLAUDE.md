@@ -10,8 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `ruff check --fix` - Run linter and auto-fix issues
 
 ### Running the Application
-- `uv run python main.py generate --profile path/to/profile.txt` - Generate a resume using job search
-- `uv run python main.py generate --profile path/to/profile.txt --location "San Francisco, CA" --max-results 30` - Generate resume with specific search parameters
+- `uv run python main.py generate --profile path/to/profile.txt` - Generate a cover letter using job search
+- `uv run python main.py generate --profile path/to/profile.txt --location "San Francisco, CA" --max-results 30` - Generate cover letter with specific search parameters
 - `python main.py generate --help` - Show CLI help for generate command
 - `python main.py create-profile-template --output my_profile.txt` - Create example profile template
 
@@ -24,15 +24,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a multi-agent AI resume generator built with LangChain and LangGraph. The application uses a workflow-based architecture with specialized agents:
+This is a multi-agent AI cover letter generator built with LangChain and LangGraph. The application uses a workflow-based architecture with specialized agents:
 
 ### Core Workflow (src/resume_generator/workflows/graph.py)
-The LangGraph workflow orchestrates five sequential agents:
+The LangGraph workflow orchestrates four sequential agents:
 1. **ProfileExtractorAgent** - Parses user profiles into structured data
 2. **JobSearchAgent** - Searches for relevant jobs using jobspy integration
-3. **JobAnalyzerAgent** - Analyzes job descriptions and extracts requirements  
-4. **SkillsMatcherAgent** - Matches user skills with job requirements
-5. **ResumeGeneratorAgent** - Generates tailored resumes based on analysis
+3. **SkillsMatcherAgent** - Matches user skills with job requirements
+4. **CoverLetterGeneratorAgent** - Generates tailored cover letters based on analysis
 
 The workflow is defined as a StateGraph that passes a WorkflowState between agents.
 
