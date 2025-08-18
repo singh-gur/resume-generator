@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 
+from resume_generator.utils import generate_cover_letter_pdf
 from resume_generator.workflows.graph import create_cover_letter_workflow
 from resume_generator.workflows.state import WorkflowState
 
@@ -59,13 +60,13 @@ def cli():
 @click.option(
     "--output",
     "-o",
-    default="generated_cover_letter.json",
-    help="Output file path for generated cover letter",
+    default="./output",
+    help="Output directory where cover letters will be saved with auto-generated names",
 )
 @click.option(
     "--format",
     "output_format",
-    type=click.Choice(["json", "text", "markdown"]),
+    type=click.Choice(["json", "text", "markdown", "pdf"]),
     default="json",
     help="Output format",
 )
@@ -164,18 +165,39 @@ def _handle_workflow_result(result: dict, output: str, output_format: str):
 
 
 def _save_cover_letters(cover_letters: list, output: str, output_format: str):
-    """Save cover letters to files."""
-    for i, cover_letter in enumerate(cover_letters):
-        output_path = Path(output)
-        if len(cover_letters) > 1:
-            stem, suffix = output_path.stem, output_path.suffix
-            output_path = output_path.with_name(f"{stem}_{i + 1}{suffix}")
+    """Save cover letters to files in the specified directory."""
+    # Map format to extension
+    format_extensions = {"json": ".json", "text": ".txt", "markdown": ".md", "pdf": ".pdf"}
 
-        output_path.write_text(render_cover_letter(cover_letter, output_format), encoding="utf-8")
+    # Create output directory
+    output_dir = Path(output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for i, cover_letter in enumerate(cover_letters):
+        # Generate filename from job info
+        job_title = cover_letter.job_description.title or "position"
+        company = cover_letter.job_description.company or "company"
+
+        # Clean filename by removing invalid characters
+        safe_title = "".join(c for c in job_title if c.isalnum() or c in (" ", "-", "_")).rstrip()
+        safe_company = "".join(c for c in company if c.isalnum() or c in (" ", "-", "_")).rstrip()
+
+        filename = f"cover_letter_{safe_company}_{safe_title}".replace(" ", "_").lower()
+
+        # Add appropriate extension
+        expected_ext = format_extensions.get(output_format, ".txt")
+        file_path = output_dir / f"{filename}{expected_ext}"
+
+        if output_format == "pdf":
+            # For PDF, the generator handles the file writing
+            render_cover_letter(cover_letter, output_format, str(file_path))
+        else:
+            # For text formats, write the content to file
+            file_path.write_text(render_cover_letter(cover_letter, output_format), encoding="utf-8")
 
         job_info = f"{cover_letter.job_description.title} at {cover_letter.job_description.company}"
         click.echo(f"📄 Cover Letter {i + 1}: {job_info}")
-        click.echo(f"   📁 Saved to: {output_path}")
+        click.echo(f"   📁 Saved to: {file_path}")
         click.echo(f"   🎯 Match: {cover_letter.match_percentage:.1f}%")
 
 
@@ -395,12 +417,16 @@ English (Native), Spanish (Conversational)
     click.echo("Edit this file with your information and use it with the --profile option.")
 
 
-def render_cover_letter(cover_letter, fmt: str) -> str:
-    """Render cover letter content into the requested format as a string."""
+def render_cover_letter(cover_letter, fmt: str, output_path: str | None = None) -> str:
+    """Render cover letter content into the requested format."""
     if fmt == "json":
         return json.dumps(cover_letter.model_dump(), indent=2, default=str)
     if fmt == "text":
         return format_cover_letter_as_text(cover_letter)
+    if fmt == "pdf":
+        if not output_path:
+            raise ValueError("Output path is required for PDF format")
+        return generate_cover_letter_pdf(cover_letter, output_path)
     return format_cover_letter_as_markdown(cover_letter)
 
 

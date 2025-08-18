@@ -7,7 +7,15 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "generate", "--profile", ".ignore/profile_template.json", "--search-term", "senior software engineer", "-l", "Philadelphia, PA"
+                "generate",
+                "--profile",
+                ".ignore/profile_template.json",
+                "--search-term",
+                "senior software engineer",
+                "-l",
+                "Philadelphia, PA",
+                "-o",
+                ".ignore/cover_letters"
             ],
             "envFile": "${workspaceFolder}/.env"
         }
