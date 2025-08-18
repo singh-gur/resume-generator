@@ -9,7 +9,7 @@
             "args": [
                 "generate",
                 "--profile",
-                ".ignore/profile_template.json",
+                ".ignore/my_profile.json",
                 "-s",
                 "senior software engineer",
                 "-l",
@@ -19,7 +19,9 @@
                 "--max-results",
                 "5",
                 "--format",
-                "pdf"
+                "pdf",
+                "--job-sites",
+                "linkedin"
             ],
             "envFile": "${workspaceFolder}/.env"
         }

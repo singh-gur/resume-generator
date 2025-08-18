@@ -4,7 +4,6 @@ from typing import Any
 
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseLLM
-from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
 from resume_generator.observability import get_langfuse_callback
@@ -16,22 +15,29 @@ class BaseAgent(ABC):
             self.llm = llm
             return
         api_key = getenv("OPENAI_API_KEY")
+        ollama_model = getenv("OLLAMA_MODEL")
 
-        if api_key is None:
-            raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it to use the OpenAI API.")
-
-        # Get Langfuse callback for tracing
         callbacks = []
         langfuse_callback = get_langfuse_callback()
         if langfuse_callback:
             callbacks.append(langfuse_callback)
 
-        self.llm = ChatOpenAI(
-            model=getenv("OPENAI_MODEL", "openai/gpt-5-mini"),
-            api_key=SecretStr(api_key),
-            base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
-            callbacks=callbacks,
-        )
+        if api_key:
+            from langchain_openai import ChatOpenAI
+
+            self.llm = ChatOpenAI(
+                model=getenv("OPENAI_MODEL", "openai/gpt-5-mini"),
+                api_key=SecretStr(api_key),
+                base_url=getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
+                callbacks=callbacks,
+            )
+        elif ollama_model:
+            from langchain_ollama.llms import OllamaLLM
+
+            reason = getenv("OLLAMA_REASONING", "n").lower() in ["y", "yes", "true", "1"]
+            self.llm = OllamaLLM(model=ollama_model, callbacks=callbacks, reasoning=reason)
+        else:
+            raise ValueError("No valid LLM configuration found. Please set OPENAI_API_KEY or OLLAMA_MODEL.")
 
     def create_prompt(self, system_message: str, user_message: str) -> list:
         return [

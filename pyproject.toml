@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "click>=8.2.1",
     "langchain>=0.3.27",
+    "langchain-ollama>=0.3.6",
     "langchain-openai>=0.3.30",
     "langfuse>=3.2.8",
     "langgraph>=0.6.5",
