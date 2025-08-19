@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 from langchain.schema import BaseMessage
@@ -103,7 +102,7 @@ class CoverLetterGeneratorAgent(BaseAgent):
         skill_matches: list[SkillMatch],
     ) -> str:
         system_message = """
-        You are an expert cover letter writer. Create a compelling, professional cover letter that:
+        You are an expert cover letter writer. Create compelling body paragraphs for a professional cover letter that:
         1. Opens with a strong hook that shows genuine interest in the role and company
         2. Clearly connects the candidate's experience and skills to the job requirements
         3. Tells a story that demonstrates value and impact
@@ -111,23 +110,22 @@ class CoverLetterGeneratorAgent(BaseAgent):
         5. Uses specific examples and quantifiable achievements when possible
         6. Maintains a professional yet engaging tone throughout
         7. Ends with a strong call to action
-        8. Is 3-4 paragraphs long and follows proper business letter format
+        8. Is 3-4 paragraphs of body content only
         
         IMPORTANT FORMATTING REQUIREMENTS:
-        - Include today's date at the top in "Month Day, Year" format (e.g., "January 18, 2025")
-        - Use proper business letter structure with date, recipient, salutation, body, and closing
-        - Do NOT include placeholder text like [Date], [Name], or [Address] - use actual values
-        - Do NOT include any debug information, analysis notes, or meta-commentary in the letter
-        - The output should be ONLY the final cover letter content, ready to send
+        - Generate ONLY the main body paragraphs of the cover letter
+        - Do NOT include date, recipient information, salutation (Dear...), or signature
+        - Do NOT include placeholder text like [Date], [Name], or [Address]
+        - Do NOT include any debug information, analysis notes, or meta-commentary
+        - Do NOT start with "Dear" or any greeting - jump straight into the first paragraph
+        - Do NOT include any header lines or contact information
+        - The output should be just the paragraph content, ready to be inserted into a business letter template
+        - Separate paragraphs with double line breaks
         
-        Structure:
-        - Date line at top
-        - Recipient information (Hiring Manager, Company Name)
-        - Professional salutation (Dear Hiring Manager,)
+        Content Structure:
         - Opening paragraph: Express interest and briefly introduce yourself
         - Middle paragraph(s): Highlight relevant experience and achievements that match job requirements
         - Closing paragraph: Reiterate interest and request for interview
-        - Professional closing (Sincerely, [Full Name])
         
         Focus on the skills and experiences that best match the job requirements and show concrete value.
         """
@@ -138,13 +136,8 @@ class CoverLetterGeneratorAgent(BaseAgent):
         # Get most relevant experience
         most_recent_experience = user_profile.experience[0] if user_profile.experience else None
 
-        # Get today's date in proper format
-        today = datetime.now().strftime("%B %d, %Y")
-
         user_message = f"""
-        Write a cover letter for the following job application.
-        
-        Today's date: {today}
+        Write the body paragraphs for a cover letter for the following job application.
         
         Job Information:
         - Job Title: {job_listing.title}
@@ -172,8 +165,8 @@ class CoverLetterGeneratorAgent(BaseAgent):
             else "No specific achievements listed"
         }
         
-        Create a personalized, compelling cover letter that demonstrates why this candidate is perfect for this role.
-        Use proper business letter format with date, salutation, body paragraphs, and professional closing.
+        Create personalized, compelling body paragraphs that demonstrate why this candidate is perfect for this role.
+        Generate only the main content paragraphs - no date, salutation, or signature.
         """
 
         messages = self.create_prompt(system_message, user_message)
