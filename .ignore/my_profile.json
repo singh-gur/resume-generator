@@ -1,0 +1,309 @@
+{
+  "full_name": "Alex Richardson",
+  "contact_info": {
+    "email": "alex.richardson@email.com",
+    "phone": "(555) 987-6543",
+    "linkedin": "https://linkedin.com/in/alexrichardsontech",
+    "github": "https://github.com/alexrichardson",
+    "portfolio": "https://alexrichardson.dev",
+    "location": "Seattle, WA"
+  },
+  "professional_summary": "Senior Engineering Leader with 10+ years of experience building scalable distributed systems, data platforms, and leading high-performance engineering teams. Proven track record of architecting and delivering complex software solutions across multiple technology stacks including Python, Go, Java, and C#. Expert in cloud platforms (AWS, GCP), microservices architecture, and data mesh implementations. Successfully led teams of 15+ engineers while maintaining hands-on technical contributions in backend systems, data pipelines, and platform engineering.",
+  "skills": [
+    "Python",
+    "Go",
+    "Java",
+    "C#",
+    "JavaScript/TypeScript",
+    "Rust",
+    "SQL",
+    "NoSQL",
+    "Kubernetes",
+    "Docker",
+    "AWS",
+    "Google Cloud Platform (GCP)",
+    "Azure",
+    "Terraform",
+    "Apache Kafka",
+    "Apache Spark",
+    "Apache Airflow",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Elasticsearch",
+    "Cassandra",
+    "Apache Flink",
+    "Apache Beam",
+    "Hadoop",
+    "Snowflake",
+    "BigQuery",
+    "Databricks",
+    "Prometheus",
+    "Grafana",
+    "Jaeger",
+    "OpenTelemetry",
+    "Jenkins",
+    "GitHub Actions",
+    "GitLab CI",
+    "ArgoCD",
+    "Helm",
+    "Istio",
+    "gRPC",
+    "REST APIs",
+    "GraphQL",
+    "Microservices Architecture",
+    "Event-Driven Architecture",
+    "Data Mesh",
+    "Domain-Driven Design",
+    "System Design",
+    "Technical Leadership",
+    "Team Management",
+    "Agile/Scrum",
+    "DevOps",
+    "Site Reliability Engineering (SRE)",
+    "Performance Optimization",
+    "Security Best Practices"
+  ],
+  "education": [
+    {
+      "institution": "Stanford University",
+      "degree": "Master of Science",
+      "field_of_study": "Computer Science",
+      "graduation_date": "2015-06-01",
+      "gpa": 3.8,
+      "relevant_coursework": [
+        "Distributed Systems",
+        "Machine Learning",
+        "Database Systems",
+        "Advanced Algorithms",
+        "Computer Networks",
+        "Software Engineering"
+      ]
+    },
+    {
+      "institution": "University of Washington",
+      "degree": "Bachelor of Science",
+      "field_of_study": "Computer Science",
+      "graduation_date": "2013-06-01",
+      "gpa": 3.7,
+      "relevant_coursework": [
+        "Data Structures",
+        "Operating Systems",
+        "Computer Architecture",
+        "Software Design",
+        "Programming Languages"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "company": "TechGiant Corp",
+      "position": "Senior Engineering Manager / Principal Engineer",
+      "start_date": "2021-03-01",
+      "end_date": null,
+      "description": "Lead engineering organization responsible for data platform and infrastructure serving 100M+ users. Manage 15+ engineers across 3 teams while maintaining hands-on technical contributions to critical systems architecture.",
+      "key_achievements": [
+        "Architected and implemented company-wide data mesh platform serving 500+ data products",
+        "Led migration from monolithic architecture to microservices, improving system reliability by 99.9%",
+        "Built real-time data processing pipelines handling 50TB+ daily using Kafka, Spark, and Kubernetes",
+        "Established engineering best practices reducing deployment cycle time from weeks to hours",
+        "Mentored 20+ engineers, with 8 promoted to senior roles under my leadership",
+        "Designed multi-cloud disaster recovery strategy reducing RTO from 4 hours to 15 minutes",
+        "Implemented comprehensive observability stack reducing mean time to resolution by 70%"
+      ],
+      "technologies_used": [
+        "Python",
+        "Go",
+        "Java",
+        "Kubernetes",
+        "AWS",
+        "GCP",
+        "Apache Kafka",
+        "Apache Spark",
+        "Terraform",
+        "PostgreSQL",
+        "BigQuery",
+        "Prometheus",
+        "Grafana"
+      ]
+    },
+    {
+      "company": "CloudScale Inc",
+      "position": "Staff Software Engineer",
+      "start_date": "2019-01-01",
+      "end_date": "2021-02-28",
+      "description": "Technical lead for backend platform serving fintech applications. Responsible for system architecture, performance optimization, and technical mentoring of junior engineers.",
+      "key_achievements": [
+        "Designed and built high-throughput transaction processing system handling 1M+ requests per second",
+        "Implemented event-sourcing architecture reducing data inconsistency incidents by 95%",
+        "Led team of 6 engineers in developing real-time fraud detection system using machine learning",
+        "Optimized database queries and caching strategies improving API response times by 80%",
+        "Established code review processes and testing standards increasing code coverage to 95%",
+        "Built comprehensive CI/CD pipeline reducing deployment failures by 90%"
+      ],
+      "technologies_used": [
+        "Python",
+        "Go",
+        "PostgreSQL",
+        "Redis",
+        "Kubernetes",
+        "AWS",
+        "Apache Kafka",
+        "Elasticsearch",
+        "Docker",
+        "Jenkins"
+      ]
+    },
+    {
+      "company": "DataFlow Systems",
+      "position": "Senior Software Engineer",
+      "start_date": "2016-08-01",
+      "end_date": "2018-12-31",
+      "description": "Full-stack engineer specializing in data pipeline architecture and analytics platforms. Built scalable ETL systems and data visualization tools for enterprise clients.",
+      "key_achievements": [
+        "Architected distributed ETL pipeline processing 10TB+ daily data from multiple sources",
+        "Built real-time analytics dashboard using React and D3.js serving 1000+ concurrent users",
+        "Implemented data quality monitoring system reducing data pipeline failures by 60%",
+        "Optimized Spark jobs reducing processing time from hours to minutes",
+        "Led initiative to migrate legacy systems to cloud-native architecture",
+        "Mentored 3 junior engineers in backend development and system design"
+      ],
+      "technologies_used": [
+        "Python",
+        "Java",
+        "Apache Spark",
+        "Apache Airflow",
+        "PostgreSQL",
+        "MongoDB",
+        "React",
+        "AWS",
+        "Docker"
+      ]
+    },
+    {
+      "company": "Enterprise Solutions LLC",
+      "position": "Software Engineer II",
+      "start_date": "2014-07-01",
+      "end_date": "2016-07-31",
+      "description": "Backend engineer developing enterprise applications and integration services. Worked with multiple technology stacks including .NET, Java, and Python to build scalable business solutions.",
+      "key_achievements": [
+        "Developed microservices-based integration platform connecting 50+ legacy systems",
+        "Built REST APIs serving 10M+ requests daily with 99.99% uptime",
+        "Implemented automated testing framework reducing manual QA time by 50%",
+        "Optimized database performance improving query response times by 70%",
+        "Collaborated with product managers to deliver features for 500+ enterprise clients"
+      ],
+      "technologies_used": [
+        "C#",
+        ".NET Framework",
+        "Java",
+        "Spring Boot",
+        "SQL Server",
+        "Oracle Database",
+        "RabbitMQ",
+        "Azure"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Open Source Data Mesh Framework",
+      "description": "Created and maintain an open-source framework for implementing data mesh architecture patterns. Used by 50+ companies worldwide.",
+      "technologies_used": [
+        "Python",
+        "Go",
+        "Kubernetes",
+        "Apache Kafka",
+        "PostgreSQL",
+        "gRPC"
+      ],
+      "url": "https://github.com/alexrichardson/data-mesh-framework",
+      "achievements": [
+        "2000+ GitHub stars and 500+ forks",
+        "Featured in multiple conference talks and technical blogs",
+        "Adopted by Fortune 500 companies for production workloads",
+        "Active community with 100+ contributors"
+      ]
+    },
+    {
+      "name": "Real-time Analytics Platform",
+      "description": "Built comprehensive real-time analytics platform for IoT data processing and visualization, capable of processing millions of events per second.",
+      "technologies_used": [
+        "Go",
+        "Apache Kafka",
+        "Apache Flink",
+        "ClickHouse",
+        "React",
+        "TypeScript",
+        "Kubernetes"
+      ],
+      "url": "https://github.com/alexrichardson/realtime-analytics",
+      "achievements": [
+        "Processes 10M+ events per second with sub-second latency",
+        "Handles petabyte-scale data storage and querying",
+        "Deployed across multiple cloud providers with auto-scaling",
+        "Featured in Cloud Native Computing Foundation case studies"
+      ]
+    },
+    {
+      "name": "Distributed Systems Learning Platform",
+      "description": "Educational platform with interactive tutorials and labs for learning distributed systems concepts, used by universities and bootcamps.",
+      "technologies_used": [
+        "Python",
+        "JavaScript",
+        "Docker",
+        "Kubernetes",
+        "React",
+        "FastAPI"
+      ],
+      "url": "https://github.com/alexrichardson/distributed-systems-lab",
+      "achievements": [
+        "Used by 20+ universities in computer science curricula",
+        "10,000+ students completed hands-on labs",
+        "Winner of 'Best Educational Tool' at DevEd Conference 2023"
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect - Professional",
+      "issuer": "Amazon Web Services",
+      "issue_date": "2023-09-01",
+      "expiry_date": "2026-09-01",
+      "credential_url": "https://aws.amazon.com/certification/verify"
+    },
+    {
+      "name": "Google Cloud Professional Data Engineer",
+      "issuer": "Google Cloud",
+      "issue_date": "2023-06-01",
+      "expiry_date": "2025-06-01",
+      "credential_url": "https://cloud.google.com/certification/verify"
+    },
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation",
+      "issue_date": "2022-11-01",
+      "expiry_date": "2025-11-01",
+      "credential_url": null
+    },
+    {
+      "name": "Apache Kafka Certified Developer",
+      "issuer": "Confluent",
+      "issue_date": "2022-08-01",
+      "expiry_date": "2024-08-01",
+      "credential_url": "https://confluent.io/certification/verify"
+    },
+    {
+      "name": "HashiCorp Certified: Terraform Associate",
+      "issuer": "HashiCorp",
+      "issue_date": "2021-12-01",
+      "expiry_date": "2024-12-01",
+      "credential_url": null
+    }
+  ],
+  "languages": [
+    "English (Native)",
+    "Spanish (Conversational)",
+    "French (Basic)"
+  ]
+}
